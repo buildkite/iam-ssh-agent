@@ -23,6 +23,17 @@ Resources:
           Properties:
             Path: /identities
             Method: get
+  GetSignatureFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ssh-agent-backend/
+      Handler: GetSignature.handler
+      Events:
+        SSHAgentBackend:
+          Type: Api
+          Properties:
+            Path: /signature
+            Method: post
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
