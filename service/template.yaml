@@ -17,6 +17,9 @@ Resources:
     Properties:
       CodeUri: ssh-agent-backend/
       Handler: ListIdentities.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ResourcePermissionTable
       Events:
         SSHAgentBackend:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -28,6 +31,13 @@ Resources:
     Properties:
       CodeUri: ssh-agent-backend/
       Handler: GetSignature.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ResourcePermissionTable
+        - SSMParameterReadPolicy:
+            ParameterName: github/*/*/deploy-key
+        - KMSDecryptPolicy:
+            KeyId: aws/ssm
       Events:
         SSHAgentBackend:
           Type: Api
