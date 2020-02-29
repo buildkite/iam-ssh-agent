@@ -13,6 +13,7 @@ Globals:
   Api:
     Auth:
       DefaultAuthorizer: AWS_IAM
+    EndpointConfiguration: REGIONAL
 
 Resources:
   ListIdentitiesFunction:
