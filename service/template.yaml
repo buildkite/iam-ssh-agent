@@ -12,16 +12,16 @@ Globals:
     Runtime: nodejs12.x
 
 Resources:
-  HelloWorldFunction:
+  ListIdentitiesFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: hello-world/
-      Handler: app.lambdaHandler
+      CodeUri: ssh-agent-backend/
+      Handler: ListIdentities.handler
       Events:
-        HelloWorld:
+        SSHAgentBackend:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /hello
+            Path: /identities
             Method: get
 
 Outputs:
