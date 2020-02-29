@@ -9,6 +9,7 @@ Description: >
 Globals:
   Function:
     Timeout: 3
+    Runtime: nodejs12.x
 
 Resources:
   HelloWorldFunction:
@@ -16,7 +17,6 @@ Resources:
     Properties:
       CodeUri: hello-world/
       Handler: app.lambdaHandler
-      Runtime: nodejs12.x
       Events:
         HelloWorld:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
