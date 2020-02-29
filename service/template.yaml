@@ -44,6 +44,12 @@ Resources:
           Properties:
             Path: /signature
             Method: post
+  ResourcePermissionTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: IamEntityArn
+        Type: String
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
