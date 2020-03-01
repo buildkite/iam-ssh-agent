@@ -1,33 +1,34 @@
-// const axios = require('axios')
-// const url = 'http://checkip.amazonaws.com/';
-let response;
+const AWS = require('aws-sdk');
 
-/**
- *
- * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
- * @param {Object} event - API Gateway Lambda Proxy Input Format
- *
- * Context doc: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html 
- * @param {Object} context
- *
- * Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
- * @returns {Object} object - API Gateway Lambda Proxy Output Format
- * 
- */
+import fetchKeyParametersListForCaller from './lib.js';
+
+async function fetchPrivateKey(key) {
+    let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
+
+    let response = await ssm.getParameter({
+        Name: key
+    }).promise();
+
+    return response.Parameter.Value;
+}
+
 exports.handler = async (event, context) => {
     try {
-        // const ret = await axios(url);
-        response = {
+        let identity = event.requestContext.identity;
+        let [caller,_] = identity.caller.split(":");
+        console.log(`fn=handler caller=${caller}`);
+
+        let keyList = await fetchKeyParametersListForCaller(caller);
+        console.log(`fn=handler caller=${caller} keys=${keyList.join(',')}`);
+        
+        return {
             'statusCode': 200,
             'body': JSON.stringify({
-                message: 'hello world',
-                // location: ret.data.trim()
+                signature: "",
             })
         }
     } catch (err) {
         console.log(err);
         return err;
     }
-
-    return response
 };
