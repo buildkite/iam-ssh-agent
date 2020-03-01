@@ -1,6 +1,11 @@
-// const axios = require('axios')
-// const url = 'http://checkip.amazonaws.com/';
-let response;
+const AWS = require('aws-sdk');
+
+async function fetchPublicKey(key) {
+    let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
+    return ssm.getParameter({
+        Name: key
+    }).promise();
+}
 
 /**
  *
@@ -16,8 +21,9 @@ let response;
  */
 exports.handler = async (event, context) => {
     try {
-        // const ret = await axios(url);
-        response = {
+        let key = await fetchPublicKey('/github/keithduncan/sara-r4/deploy-key.pub');
+
+        return {
             'statusCode': 200,
             'body': JSON.stringify({
                 message: 'hello world',
@@ -28,6 +34,4 @@ exports.handler = async (event, context) => {
         console.log(err);
         return err;
     }
-
-    return response
 };
