@@ -8,6 +8,7 @@ dependencies = [
  "futures",
  "rusoto_core",
  "serde",
+ "serde_json",
  "ssh_agent",
  "url",
 ]
