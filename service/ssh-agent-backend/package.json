@@ -1,10 +1,9 @@
 {
-  "name": "hello_world",
+  "name": "ssh-agent-backend",
   "version": "1.0.0",
-  "description": "hello world sample for NodeJS",
-  "main": "app.js",
-  "repository": "https://github.com/awslabs/aws-sam-cli/tree/develop/samcli/local/init/templates/cookiecutter-aws-sam-hello-nodejs",
-  "author": "SAM CLI",
+  "description": "ssh-agent-backend lambda functions",
+  "repository": "https://github.com/keithduncan/iam-ssh-agent",
+  "author": "Keith Duncan",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0"
