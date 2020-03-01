@@ -51,7 +51,7 @@ fn main() {
 
 		let response = Client::shared()
             .sign_and_dispatch(request, parse_http_list_identities)
-            .wait()
+            .sync()
             .expect("response");
 
         eprintln!("{:?}", response);
