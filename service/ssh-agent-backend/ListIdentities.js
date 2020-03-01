@@ -1,17 +1,6 @@
 const AWS = require('aws-sdk');
 
-import fetchKeyParametersListForCaller from './lib.js';
-
-// TODO do a bulk GetParameters with batches of 10 keys
-async function fetchPublicKey(key) {
-    let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
-
-    let response = await ssm.getParameter({
-        Name: key
-    }).promise();
-
-    return response.Parameter.Value;
-}
+import { fetchKeyParametersListForCaller, fetchPublicKey } from './lib.js';
 
 exports.handler = async (event, context) => {
     try {
@@ -22,6 +11,7 @@ exports.handler = async (event, context) => {
         let keyList = await fetchKeyParametersListForCaller(caller);
         console.log(`fn=handler caller=${caller} keys=${keyList.join(',')}`);
 
+        // TODO do a bulk GetParameters with batches of 10 keys
         let keys = await Promise.all(keyList.map(key => {
             let publicKey = `${key}.pub`;
             return fetchPublicKey(publicKey);

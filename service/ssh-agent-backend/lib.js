@@ -27,3 +27,13 @@ exports.fetchKeyParametersListForCaller = async function (caller) => {
 
     return parameters.SS;
 };
+
+exports.fetchPublicKey = async function (key) => {
+    let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
+
+    let response = await ssm.getParameter({
+        Name: key
+    }).promise();
+
+    return response.Parameter.Value;
+};
