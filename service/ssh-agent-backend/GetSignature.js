@@ -6,7 +6,8 @@ async function fetchPrivateKey(key) {
     let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
 
     let response = await ssm.getParameter({
-        Name: key
+        Name: key,
+        WithDecryption: true,
     }).promise();
 
     return response.Parameter.Value;
