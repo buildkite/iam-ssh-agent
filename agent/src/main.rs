@@ -22,10 +22,13 @@ fn main() {
 
 	if let Some(matches) = matches.subcommand_matches("list-keys") {
 		eprintln!("{:?}", matches);
+		return;
 	}
 
 	if let Some(matches) = matches.subcommand_matches("daemon") {
+		// export SSH_AGENT_SOCK
 		eprintln!("{:?}", matches);
+		return;
 	}
 
 	unimplemented!()
