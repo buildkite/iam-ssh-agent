@@ -10,3 +10,6 @@ edition = "2018"
 ssh_agent = { git = 'https://github.com/ntrippar/ssh-agent' }
 clap = "2.33.0"
 rusoto_core = "0.42.0"
+url = "2.1.1"
+futures = "0.1.29"
+serde = { version = "1.0", features = ["derive"] }
