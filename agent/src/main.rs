@@ -14,14 +14,18 @@ fn main() {
 		    .help("Run the daemon, bind a UNIX domain socket."))
 		.get_matches();
 
-	println!("{:?}", matches);
+	eprintln!("{:?}", matches);
+
+	// Uses an environment variable rather than an argument so that this can be
+	// an ECS ValueFrom in an ECS task.
+	let ssh_agent_backend_url = std::env::var("IAM_SSH_AGENT_BACKEND_URL").expect("IAM_SSH_AGENT_BACKEND_URL is required");
 
 	if let Some(matches) = matches.subcommand_matches("list-keys") {
-
+		eprintln!("{:?}", matches);
 	}
 
 	if let Some(matches) = matches.subcommand_matches("daemon") {
-		
+		eprintln!("{:?}", matches);
 	}
 
 	unimplemented!()
