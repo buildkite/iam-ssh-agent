@@ -1,10 +1,40 @@
 const AWS = require('aws-sdk');
 
+async function listKeysForCaller(caller) {
+    let dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+    
+    let response = await dynamodb.getItem({
+        TableName: process.env.KEY_PERMISSIONS_TABLE_NAME,
+        Key: {
+            "IamEntityArn": {
+                S: caller,
+            }
+        },
+        AttributesToGet: [
+            "Parameters",
+        ],
+    }).promise();
+
+    let item = response.Item;
+    if (item  == undefined) {
+        return [];
+    }
+
+
+
+    let key = await fetchPublicKey('/github/keithduncan/sara-r4/deploy-key.pub');
+}
+
 async function fetchPublicKey(key) {
     let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
-    return ssm.getParameter({
+
+    let parameter = await ssm.getParameter({
         Name: key
     }).promise();
+
+
+
+    return parameter;
 }
 
 /**
@@ -21,12 +51,16 @@ async function fetchPublicKey(key) {
  */
 exports.handler = async (event, context) => {
     try {
-        let key = await fetchPublicKey('/github/keithduncan/sara-r4/deploy-key.pub');
+        let identity = event.requestContext.identity;
 
+        let keys = await listKeysForCaller(caller);
+        
         return {
             'statusCode': 200,
             'body': JSON.stringify({
-                message: 'hello world',
+                message: key,
+                event: event,
+                context_identity: context.identity,
                 // location: ret.data.trim()
             })
         }
