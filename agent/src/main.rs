@@ -9,16 +9,20 @@ fn main() {
 		.author("Keith Duncan <keith_duncan@me.com>")
 		.about("Use an AWS IAM SSH Agent backend for SSH Authentication")
 		.subcommand(SubCommand::with_name("list-keys")
-		        .long("list-keys")
-		        .short("l")
-		        .help("List all keys for the caller IAM identity."))
-		.arg(SubCommand::with_name("daemon")
-		        .long("daemon")
-		        .help("Run the daemon, bind a UNIX domain socket."))
-		.subcommand_required(true)
+		    .help("List all keys for the caller IAM identity."))
+		.subcommand(SubCommand::with_name("daemon")
+		    .help("Run the daemon, bind a UNIX domain socket."))
 		.get_matches();
 
 	println!("{:?}", matches);
+
+	if let Some(matches) = matches.subcommand_matches("list-keys") {
+
+	}
+
+	if let Some(matches) = matches.subcommand_matches("daemon") {
+		
+	}
 
 	unimplemented!()
 }
