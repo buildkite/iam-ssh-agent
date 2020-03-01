@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 
-exports.fetchKeyParametersListForCaller = async function (caller) => {
+exports.fetchKeyParameterListForCaller = async function (caller) => {
     let dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
     
     let response = await dynamodb.getItem({
@@ -28,11 +28,11 @@ exports.fetchKeyParametersListForCaller = async function (caller) => {
     return parameters.SS;
 };
 
-exports.fetchPublicKey = async function (key) => {
+exports.fetchPublicKeyForParameter = async function (keyParameter) => {
     let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
 
     let response = await ssm.getParameter({
-        Name: key
+        Name: `${keyParameter}.pub`,
     }).promise();
 
     return response.Parameter.Value;
