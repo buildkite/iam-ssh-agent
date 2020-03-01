@@ -32,6 +32,7 @@ exports.handler = async (event, context) => {
                 continue;
             }
 
+            console.log(`fn=handler caller=${caller} key=${keyParameter} at=match`);
             let privateKey = fetchPrivateKeyForParameter(keyParameter);
 
             return {
