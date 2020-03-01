@@ -42,8 +42,11 @@ async function fetchPublicKey(key) {
 exports.handler = async (event, context) => {
     try {
         let identity = event.requestContext.identity;
+        let [caller,_] = identity.caller.split(":");
+        console.log(`fn=handler caller=${caller}`);
 
         let keyList = await fetchKeyParametersListForCaller(caller);
+        console.log(`fn=handler caller=${caller} keys=${keyList.join(',')}`);
 
         let keys = await Promise.all(keyList.map(key => {
             let publicKey = `${key}.pub`;
