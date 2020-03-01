@@ -6,7 +6,7 @@ async function fetchKeyParametersListForCaller(caller) {
     let response = await dynamodb.getItem({
         TableName: process.env.KEY_PERMISSIONS_TABLE_NAME,
         Key: {
-            "IamEntityArn": {
+            "IamEntityUniqueId": {
                 S: caller,
             }
         },

@@ -58,7 +58,7 @@ Resources:
     Type: AWS::Serverless::SimpleTable
     Properties:
       PrimaryKey:
-        Name: IamEntityArn
+        Name: IamEntityUniqueId
         Type: String
 
 Outputs:
