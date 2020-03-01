@@ -20,21 +20,23 @@ async function listKeysForCaller(caller) {
         return [];
     }
 
+    let parameters = item.Parameters;
+    if (parameters == undefined) {
+        return [];
+    }
 
-
-    let key = await fetchPublicKey('/github/keithduncan/sara-r4/deploy-key.pub');
+    return parameters.SS;
 }
 
+// TODO do a bulk GetParameters with batches of 10 keys
 async function fetchPublicKey(key) {
     let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
 
-    let parameter = await ssm.getParameter({
+    let response = await ssm.getParameter({
         Name: key
     }).promise();
 
-
-
-    return parameter;
+    return response.Parameter.Value;
 }
 
 /**
