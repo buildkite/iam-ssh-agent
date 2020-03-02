@@ -20,18 +20,26 @@ mod service {
 
 	}
 
-	fn as_base64<S>(vec: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
+	fn to_base64<S>(vec: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
     where
     	S: serde::Serializer
 	{
 	    serializer.serialize_str(&base64::encode(&vec[..]))
 	}
 
+	fn from_base64<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+	where
+		D: serde::Deserializer<'de>
+	{
+		let s = <&str>::deserialize(deserializer)?;
+        base64::decode(s).map_err(serde::de::Error::custom)
+	}
+
 	#[derive(Debug, Serialize)]
 	pub struct SignRequest {
-		#[serde(serialize_with = "as_base64")]
+		#[serde(serialize_with = "to_base64")]
 		pubkey: Vec<u8>,
-		#[serde(serialize_with = "as_base64")]
+		#[serde(serialize_with = "to_base64")]
 		data: Vec<u8>,
 		flags: u32,
 	}
@@ -48,26 +56,38 @@ mod service {
 
 	#[derive(Debug, Deserialize)]
 	pub struct Signature {
-		
+		#[serde(deserialize_with = "from_base64")]
+		sig: Vec<u8>,
 	}
 
 	#[derive(Debug)]
 	pub enum SignError {
-		Unknown
+		
 	}
-}
 
-fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = service::ListIdentities, Error = RusotoError<service::ListIdentitiesError>> + Send> {
-	Box::new(response.buffer().map_err(RusotoError::HttpDispatch).and_then(|buffered: BufferedHttpResponse| {
-		match serde_json::from_slice(&buffered.body) {
-			Ok(p) => Box::new(futures::future::ok(p)),
-			Err(e) => Box::new(futures::future::err(RusotoError::ParseError(format!("{:?}", e)))),
+	impl Into<SignatureBlob> for Signature {
+		fn into(self) -> SignatureBlob {
+			self.sig
 		}
-	}))
-}
+	}
 
-fn parse_http_signature(response: HttpResponse) -> Box<dyn Future<Item = service::Signature, Error = RusotoError<service::SignError>> + Send> {
-	Box::new(futures::future::err(RusotoError::Service(service::SignError::Unknown)))
+	pub fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = service::ListIdentities, Error = RusotoError<service::ListIdentitiesError>> + Send> {
+		Box::new(response.buffer().map_err(RusotoError::HttpDispatch).and_then(|buffered: BufferedHttpResponse| {
+			match serde_json::from_slice(&buffered.body) {
+				Ok(p) => Box::new(futures::future::ok(p)),
+				Err(e) => Box::new(futures::future::err(RusotoError::ParseError(format!("{:?}", e)))),
+			}
+		}))
+	}
+
+	pub fn parse_http_signature(response: HttpResponse) -> Box<dyn Future<Item = service::Signature, Error = RusotoError<service::SignError>> + Send> {
+		Box::new(response.buffer().map_err(RusotoError::HttpDispatch).and_then(|buffered: BufferedHttpResponse| {
+			match serde_json::from_slice(&buffered.body) {
+				Ok(p) => Box::new(futures::future::ok(p)),
+				Err(e) => Box::new(futures::future::err(RusotoError::ParseError(format!("{:?}", e)))),
+			}
+		}))
+	}
 }
 
 fn main() {
@@ -144,7 +164,7 @@ impl AgentBackend {
 		request.set_hostname(Some(self.url.host_str().expect("url host").to_owned()));
 
 		Client::shared()
-			.sign_and_dispatch(request, parse_http_list_identities)
+			.sign_and_dispatch(request, service::parse_http_list_identities)
 			.sync()
 	}
 
@@ -180,16 +200,16 @@ impl AgentBackend {
 		request.set_content_type("application/json".to_string());
 
 		Client::shared()
-			.sign_and_dispatch(request, parse_http_signature)
+			.sign_and_dispatch(request, service::parse_http_signature)
 			.sync()
 	}
 
 	fn sign(&self, request: &SignRequest) -> Result<SignatureBlob, AgentBackendError> {
 		let signature = self
 			.fetch_signature(request)
-			.map_err(AgentBackendError::Sign)?;
-
-		Err(AgentBackendError::Unknown("unimplemented".to_string()))
+			.map_err(AgentBackendError::Sign)?
+			.into();
+		Ok(signature)
 	}
 }
 
