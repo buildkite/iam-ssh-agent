@@ -126,7 +126,7 @@ impl AgentBackend {
 	}
 
 	fn sign(&self, request: &SignRequest) -> Result<SignatureBlob, AgentBackendError> {
-		unimplemented!()
+		Err(AgentBackendError::Unknown("unimplemented".to_string()))
 	}
 }
 
