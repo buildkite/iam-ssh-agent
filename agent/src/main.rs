@@ -4,7 +4,7 @@ use clap::{App, Arg, SubCommand};
 use rusoto_core::{region::Region, RusotoError, Client, signature::SignedRequest, request::{HttpResponse, BufferedHttpResponse}};
 use url::Url;
 use futures::future::Future;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use openssh_keys::PublicKey;
 
 #[derive(Debug, Deserialize)]
@@ -15,6 +15,36 @@ struct ListIdentities {
 #[derive(Debug)]
 enum ListIdentitiesError {
 
+}
+
+mod service {
+	use super::*;
+
+	fn as_base64<S>(vec: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+    	S: serde::Serializer
+	{
+	    serializer.serialize_str(&base64::encode(&vec[..]))
+	}
+
+	#[derive(Debug, Serialize)]
+	pub struct SignRequest {
+		#[serde(serialize_with = "as_base64")]
+		pubkey: Vec<u8>,
+		#[serde(serialize_with = "as_base64")]
+		data: Vec<u8>,
+		flags: u32,
+	}
+
+	impl From<super::SignRequest> for SignRequest {
+		fn from(req: super::SignRequest) -> Self {
+			SignRequest {
+				pubkey: req.pubkey_blob,
+				data: req.data,
+				flags: req.flags,
+			}
+		}
+	}
 }
 
 #[derive(Debug, Deserialize)]
@@ -137,10 +167,17 @@ impl AgentBackend {
 	}
 
 	fn fetch_signature(&self, request: &SignRequest) -> Result<Signature, RusotoError<SignError>> {
+		let request: service::SignRequest = request.clone().into();
+
+		let bytes = serde_json::to_vec(&request)
+			.map_err(|e| RusotoError::ParseError(format!("{:?}", e)))?;
+
 		let region = Region::default();
 
 		let mut request = SignedRequest::new("POST", "execute-api", &region, &format!("{}/{}", self.url.path(), "signature"));
 		request.set_hostname(Some(self.url.host_str().expect("url host").to_owned()));
+		request.set_payload(Some(bytes));
+		request.set_content_type("application/json".to_string());
 
 		Client::shared()
 			.sign_and_dispatch(request, parse_http_signature)

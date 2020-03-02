@@ -4,6 +4,7 @@
 name = "agent"
 version = "0.1.0"
 dependencies = [
+ "base64 0.11.0",
  "clap",
  "futures",
  "openssh-keys",
