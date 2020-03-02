@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ssh_agent = { git = 'https://github.com/ntrippar/ssh-agent' }
+ssh-agent = "0.2.1"
 clap = "2.33.0"
 rusoto_core = "0.42.0"
 url = "2.1.1"

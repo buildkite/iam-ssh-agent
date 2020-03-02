@@ -1,5 +1,5 @@
-use std::{fs, path::Path, os::unix::net::UnixListener};
-use ssh_agent::{SSHAgentHandler, error::HandleResult, Response, Identity};
+use std::{fs, path::Path};
+use ssh_agent::{agent::Agent, proto::{Message, Identity, SignRequest, SignatureBlob}};
 use clap::{App, Arg, SubCommand};
 use rusoto_core::{region::Region, RusotoError, Client, signature::SignedRequest, request::HttpResponse};
 use url::Url;
@@ -44,12 +44,10 @@ fn main() {
 	// Uses an environment variable rather than an argument so that this can be
 	// an ECS ValueFrom in an ECS task.
 	let ssh_agent_backend_url = Url::parse(&std::env::var("IAM_SSH_AGENT_BACKEND_URL").expect("IAM_SSH_AGENT_BACKEND_URL is required")).expect("valid url");
-	let mut handler = Handler {
-		url: ssh_agent_backend_url,
-	};
+	let agent = AgentBackend::new(ssh_agent_backend_url);
 
 	if let Some(matches) = matches.subcommand_matches("list-keys") {
-        eprintln!("{:#?}", handler.list_identities());
+        eprintln!("{:#?}", agent.list_identities());
 		return;
 	}
 
@@ -65,8 +63,7 @@ fn main() {
 
         eprintln!("binding to {}", pipe.display());
 
-        let listener = UnixListener::bind(pipe).unwrap();
-        ssh_agent::Agent::run(handler, listener);
+        let _ = agent.run_unix(&pipe);
 
         // TODO support exec mode and export SSH_AGENT_SOCK
 
@@ -76,11 +73,22 @@ fn main() {
 	unimplemented!()
 }
 
-struct Handler {
+#[derive(Debug)]
+enum AgentBackendError {
+	Unknown(String),
+}
+
+struct AgentBackend {
 	url: Url,
 }
 
-impl Handler {
+impl AgentBackend {
+	fn new(url: Url) -> Self {
+		Self {
+			url,
+		}
+	}
+
 	fn list_identities(&self) -> ListIdentities {
 		let region = Region::default();
 
@@ -92,31 +100,47 @@ impl Handler {
 			.sync()
 			.expect("response")
 	}
-}
 
-impl SSHAgentHandler for Handler {
-	fn new() -> Self {
-		unimplemented!()
-	}
-
-	fn identities(&mut self) -> HandleResult<Response> {
+	fn identities(&self) -> Result<Vec<Identity>, AgentBackendError> {
 		let identities = self
 			.list_identities()
 			.identities
 			.into_iter()
 			.map(|identity| {
-
-
 				Identity {
-					key_blob: Vec::new(),
-					key_comment: String::new(),
+					pubkey_blob: Vec::new(),
+					comment: String::new(),
 				}
 			})
 			.collect();
-		HandleResult::Ok(Response::Identities(identities))
+		Ok(identities)
 	}
 
-	fn sign_request(&mut self, pubkey: Vec<u8>, data: Vec<u8>, _flags: u32) -> HandleResult<Response> {
+	fn sign(&self, request: &SignRequest) -> Result<SignatureBlob, AgentBackendError> {
 		unimplemented!()
+	}
+}
+
+impl Agent for AgentBackend {
+	type Error = AgentBackendError;
+
+	fn handle(&self, request: Message) -> Result<Message, Self::Error> {
+	    eprintln!("Request: {:#?}", request);
+
+	    let response = match request {
+			Message::RequestIdentities => {
+				Ok(Message::IdentitiesAnswer(self.identities()?))
+			},
+			Message::SignRequest(request) => {
+				Ok(Message::SignResponse(self.sign(&request)?))
+			},
+			_ => {
+				Err(AgentBackendError::Unknown(format!("received unsupported message: {:?}", request)))
+			},
+	    };
+
+	    eprintln!("Response {:#?}", response);
+
+	    response
 	}
 }
