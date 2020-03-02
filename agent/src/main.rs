@@ -112,7 +112,7 @@ fn main() {
 	let ssh_agent_backend_url = Url::parse(&std::env::var("IAM_SSH_AGENT_BACKEND_URL").expect("IAM_SSH_AGENT_BACKEND_URL is required")).expect("IAM_SSH_AGENT_BACKEND_URL is a valid url");
 	let agent = AgentBackend::new(ssh_agent_backend_url);
 
-	if let Some(matches) = matches.subcommand_matches("list-keys") {
+	if let Some(_matches) = matches.subcommand_matches("list-keys") {
         eprintln!("{:#?}", agent.identities());
 		return;
 	}
