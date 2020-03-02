@@ -7,18 +7,18 @@ use futures::future::Future;
 use serde::{Deserialize, Serialize};
 use openssh_keys::PublicKey;
 
-#[derive(Debug, Deserialize)]
-struct ListIdentities {
-	identities: Vec<String>,
-}
-
-#[derive(Debug)]
-enum ListIdentitiesError {
-
-}
-
 mod service {
 	use super::*;
+
+	#[derive(Debug, Deserialize)]
+	pub struct ListIdentities {
+		pub identities: Vec<String>,
+	}
+
+	#[derive(Debug)]
+	pub enum ListIdentitiesError {
+
+	}
 
 	fn as_base64<S>(vec: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -45,19 +45,19 @@ mod service {
 			}
 		}
 	}
+
+	#[derive(Debug, Deserialize)]
+	pub struct Signature {
+		
+	}
+
+	#[derive(Debug)]
+	pub enum SignError {
+		Unknown
+	}
 }
 
-#[derive(Debug, Deserialize)]
-struct Signature {
-
-}
-
-#[derive(Debug)]
-enum SignError {
-	Unknown
-}
-
-fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = ListIdentities, Error = RusotoError<ListIdentitiesError>> + Send> {
+fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = service::ListIdentities, Error = RusotoError<service::ListIdentitiesError>> + Send> {
 	Box::new(response.buffer().map_err(RusotoError::HttpDispatch).and_then(|buffered: BufferedHttpResponse| {
 		match serde_json::from_slice(&buffered.body) {
 			Ok(p) => Box::new(futures::future::ok(p)),
@@ -66,8 +66,8 @@ fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = L
 	}))
 }
 
-fn parse_http_signature(response: HttpResponse) -> Box<dyn Future<Item = Signature, Error = RusotoError<SignError>> + Send> {
-	Box::new(futures::future::err(RusotoError::Service(SignError::Unknown)))
+fn parse_http_signature(response: HttpResponse) -> Box<dyn Future<Item = service::Signature, Error = RusotoError<service::SignError>> + Send> {
+	Box::new(futures::future::err(RusotoError::Service(service::SignError::Unknown)))
 }
 
 fn main() {
@@ -121,8 +121,8 @@ fn main() {
 
 #[derive(Debug)]
 enum AgentBackendError {
-	ListIdentities(RusotoError<ListIdentitiesError>),
-	Sign(RusotoError<SignError>),
+	ListIdentities(RusotoError<service::ListIdentitiesError>),
+	Sign(RusotoError<service::SignError>),
 	Unknown(String),
 }
 
@@ -137,7 +137,7 @@ impl AgentBackend {
 		}
 	}
 
-	fn fetch_identities(&self) -> Result<ListIdentities, RusotoError<ListIdentitiesError>> {
+	fn fetch_identities(&self) -> Result<service::ListIdentities, RusotoError<service::ListIdentitiesError>> {
 		let region = Region::default();
 
 		let mut request = SignedRequest::new("GET", "execute-api", &region, &format!("{}/{}", self.url.path(), "identities"));
@@ -166,7 +166,7 @@ impl AgentBackend {
 		Ok(identities)
 	}
 
-	fn fetch_signature(&self, request: &SignRequest) -> Result<Signature, RusotoError<SignError>> {
+	fn fetch_signature(&self, request: &SignRequest) -> Result<service::Signature, RusotoError<service::SignError>> {
 		let request: service::SignRequest = request.clone().into();
 
 		let bytes = serde_json::to_vec(&request)
