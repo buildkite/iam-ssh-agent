@@ -5,6 +5,7 @@ use rusoto_core::{region::Region, RusotoError, Client, signature::SignedRequest,
 use url::Url;
 use futures::future::Future;
 use serde::Deserialize;
+use openssh_keys::PublicKey;
 
 #[derive(Debug, Deserialize)]
 struct ListIdentities {
@@ -47,7 +48,7 @@ fn main() {
 	let agent = AgentBackend::new(ssh_agent_backend_url);
 
 	if let Some(matches) = matches.subcommand_matches("list-keys") {
-        eprintln!("{:#?}", agent.list_identities());
+        eprintln!("{:#?}", agent.identities());
 		return;
 	}
 
@@ -106,11 +107,13 @@ impl AgentBackend {
 			.list_identities()
 			.identities
 			.into_iter()
-			.map(|identity| {
-				Identity {
-					pubkey_blob: Vec::new(),
-					comment: String::new(),
-				}
+			.filter_map(|identity| {
+				PublicKey::parse(&identity).ok().map(|key| {
+					Identity {
+						pubkey_blob: key.data(),
+						comment: key.comment.unwrap_or(String::new()),
+					}
+				})
 			})
 			.collect();
 		Ok(identities)
