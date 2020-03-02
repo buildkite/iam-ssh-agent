@@ -17,6 +17,16 @@ enum ListIdentitiesError {
 
 }
 
+#[derive(Debug, Deserialize)]
+struct Signature {
+
+}
+
+#[derive(Debug)]
+enum SignError {
+	Unknown
+}
+
 fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = ListIdentities, Error = RusotoError<ListIdentitiesError>> + Send> {
 	let response = match response.buffer().wait() {
 		Ok(body) => body,
@@ -29,6 +39,10 @@ fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = L
 	};
 
 	Box::new(futures::future::ok(body))
+}
+
+fn parse_http_signature(response: HttpResponse) -> Box<dyn Future<Item = Signature, Error = RusotoError<SignError>> + Send> {
+	Box::new(futures::future::err(RusotoError::Service(SignError::Unknown)))
 }
 
 fn main() {
@@ -72,7 +86,7 @@ fn main() {
 
         let _ = agent.run_unix(&pipe);
 
-        // TODO support exec mode and export SSH_AGENT_SOCK
+        // TODO support exec mode and export SSH_AUTH_SOCK
 
 		return;
 	}
@@ -83,6 +97,7 @@ fn main() {
 #[derive(Debug)]
 enum AgentBackendError {
 	ListIdentities(RusotoError<ListIdentitiesError>),
+	Sign(RusotoError<SignError>),
 	Unknown(String),
 }
 
@@ -127,6 +142,16 @@ impl AgentBackend {
 	}
 
 	fn sign(&self, request: &SignRequest) -> Result<SignatureBlob, AgentBackendError> {
+		let region = Region::default();
+
+		let mut request = SignedRequest::new("POST", "execute-api", &region, &format!("{}/{}", self.url.path(), "signature"));
+		request.set_hostname(Some(self.url.host_str().expect("url host").to_owned()));
+
+		let response = Client::shared()
+			.sign_and_dispatch(request, parse_http_signature)
+			.sync()
+			.map_err(AgentBackendError::Sign)?;
+
 		Err(AgentBackendError::Unknown("unimplemented".to_string()))
 	}
 }
