@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 
-import { fetchKeyParametersListForCaller, fetchPublicKeyForParameter } from './lib.js';
+const lib = require('./lib.js');
 
 async function fetchPrivateKeyForParameter(keyParameter) {
     let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
@@ -23,11 +23,11 @@ exports.handler = async (event, context) => {
 
         // Find the parameter that stores the private/public key pair for blob
         // searching the list of keys the caller has access to.
-        let keyList = await fetchKeyParametersListForCaller(caller);
+        let keyList = await lib.fetchKeyParametersListForCaller(caller);
         console.log(`fn=handler caller=${caller} keys=${keyList.join(',')}`);
 
         for (const keyParameter of keyList) {
-            let key = await fetchPublicKeyForParameter(keyParameter);
+            let key = await lib.fetchPublicKeyForParameter(keyParameter);
 
             // pubkey is base64(pubkey bits), key is a string rep of the public key with comment etc
             // this needs to parse key and compare the key bits
