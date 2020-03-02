@@ -19,7 +19,7 @@ exports.handler = async (event, context) => {
         let [caller,_] = identity.caller.split(":");
         console.log(`fn=handler caller=${caller}`);
 
-        let { KeyBlob, Data, Flags } = JSON.parse(event.body);
+        let { pubkey, data, flags } = JSON.parse(event.body);
 
         // Find the parameter that stores the private/public key pair for blob
         // searching the list of keys the caller has access to.
@@ -27,8 +27,11 @@ exports.handler = async (event, context) => {
         console.log(`fn=handler caller=${caller} keys=${keyList.join(',')}`);
 
         for (const keyParameter of keyList) {
-            let publicKey = await fetchPublicKeyForParameter(keyParameter);
-            if (publicKey != KeyBlob) {
+            let key = await fetchPublicKeyForParameter(keyParameter);
+
+            // pubkey is base64(pubkey bits), key is a string rep of the public key with comment etc
+            // this needs to parse key and compare the key bits
+            if (pubkey != key) {
                 continue;
             }
 
