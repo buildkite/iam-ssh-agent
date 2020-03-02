@@ -82,6 +82,7 @@ fn main() {
 
 #[derive(Debug)]
 enum AgentBackendError {
+	ListIdentities(RusotoError<ListIdentitiesError>),
 	Unknown(String),
 }
 
@@ -96,7 +97,7 @@ impl AgentBackend {
 		}
 	}
 
-	fn list_identities(&self) -> ListIdentities {
+	fn list_identities(&self) -> Result<ListIdentities, RusotoError<ListIdentitiesError>> {
 		let region = Region::default();
 
 		let mut request = SignedRequest::new("GET", "execute-api", &region, &format!("{}/{}", self.url.path(), "identities"));
@@ -105,12 +106,12 @@ impl AgentBackend {
 		Client::shared()
 			.sign_and_dispatch(request, parse_http_list_identities)
 			.sync()
-			.expect("response")
 	}
 
 	fn identities(&self) -> Result<Vec<Identity>, AgentBackendError> {
 		let identities = self
 			.list_identities()
+			.map_err(AgentBackendError::ListIdentities)?
 			.identities
 			.into_iter()
 			.filter_map(|identity| {
