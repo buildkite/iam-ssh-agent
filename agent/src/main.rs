@@ -112,7 +112,7 @@ impl AgentBackend {
 		}
 	}
 
-	fn list_identities(&self) -> Result<ListIdentities, RusotoError<ListIdentitiesError>> {
+	fn fetch_identities(&self) -> Result<ListIdentities, RusotoError<ListIdentitiesError>> {
 		let region = Region::default();
 
 		let mut request = SignedRequest::new("GET", "execute-api", &region, &format!("{}/{}", self.url.path(), "identities"));
@@ -125,7 +125,7 @@ impl AgentBackend {
 
 	fn identities(&self) -> Result<Vec<Identity>, AgentBackendError> {
 		let identities = self
-			.list_identities()
+			.fetch_identities()
 			.map_err(AgentBackendError::ListIdentities)?
 			.identities
 			.into_iter()
@@ -141,15 +141,20 @@ impl AgentBackend {
 		Ok(identities)
 	}
 
-	fn sign(&self, request: &SignRequest) -> Result<SignatureBlob, AgentBackendError> {
+	fn fetch_signature(&self, request: &SignRequest) -> Result<Signature, RusotoError<SignError>> {
 		let region = Region::default();
 
 		let mut request = SignedRequest::new("POST", "execute-api", &region, &format!("{}/{}", self.url.path(), "signature"));
 		request.set_hostname(Some(self.url.host_str().expect("url host").to_owned()));
 
-		let response = Client::shared()
+		Client::shared()
 			.sign_and_dispatch(request, parse_http_signature)
 			.sync()
+	}
+
+	fn sign(&self, request: &SignRequest) -> Result<SignatureBlob, AgentBackendError> {
+		let signature = self
+			.fetch_signature(request)
 			.map_err(AgentBackendError::Sign)?;
 
 		Err(AgentBackendError::Unknown("unimplemented".to_string()))
