@@ -18,7 +18,10 @@ enum ListIdentitiesError {
 }
 
 fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = ListIdentities, Error = RusotoError<ListIdentitiesError>> + Send> {
-	let response = response.buffer().wait().expect("body");
+	let response = match response.buffer().wait() {
+		Ok(body) => body,
+		Err(e) => return Box::new(futures::future::err(RusotoError::HttpDispatch(e))),
+	};
 
 	let body: ListIdentities = serde_json::from_slice(&response.body).expect("parse");
 
