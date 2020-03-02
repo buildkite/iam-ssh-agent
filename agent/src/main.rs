@@ -23,7 +23,10 @@ fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = L
 		Err(e) => return Box::new(futures::future::err(RusotoError::HttpDispatch(e))),
 	};
 
-	let body: ListIdentities = serde_json::from_slice(&response.body).expect("parse");
+	let body: ListIdentities = match serde_json::from_slice(&response.body) {
+		Ok(p) => p,
+		Err(e) => return Box::new(futures::future::err(RusotoError::ParseError(format!("{:?}", e)))),
+	};
 
 	Box::new(futures::future::ok(body))
 }
@@ -47,7 +50,7 @@ fn main() {
 
 	// Uses an environment variable rather than an argument so that this can be
 	// an ECS ValueFrom in an ECS task.
-	let ssh_agent_backend_url = Url::parse(&std::env::var("IAM_SSH_AGENT_BACKEND_URL").expect("IAM_SSH_AGENT_BACKEND_URL is required")).expect("valid url");
+	let ssh_agent_backend_url = Url::parse(&std::env::var("IAM_SSH_AGENT_BACKEND_URL").expect("IAM_SSH_AGENT_BACKEND_URL is required")).expect("IAM_SSH_AGENT_BACKEND_URL is a valid url");
 	let agent = AgentBackend::new(ssh_agent_backend_url);
 
 	if let Some(matches) = matches.subcommand_matches("list-keys") {
@@ -56,7 +59,7 @@ fn main() {
 	}
 
 	if let Some(matches) = matches.subcommand_matches("daemon") {
-		let pipe = matches.value_of("bind-to").unwrap();
+		let pipe = matches.value_of("bind-to").expect("bind-to is required");
         let pipe = Path::new(pipe);
 
         if fs::metadata(&pipe).is_ok() {
