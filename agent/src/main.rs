@@ -40,8 +40,6 @@ fn main() {
 	let ssh_agent_backend_url = Url::parse(&std::env::var("IAM_SSH_AGENT_BACKEND_URL").expect("IAM_SSH_AGENT_BACKEND_URL is required")).expect("valid url");
 
 	if let Some(matches) = matches.subcommand_matches("list-keys") {
-		eprintln!("{:?}", matches);
-
 		let region = Region::default();
 
 		let mut request = SignedRequest::new("GET", "execute-api", &region, &format!("{}/{}", ssh_agent_backend_url.path(), "identities"));
@@ -52,8 +50,7 @@ fn main() {
             .sync()
             .expect("response");
 
-        eprintln!("{:?}", response);
-        
+        eprintln!("{:#?}", response);
 		return;
 	}
 
