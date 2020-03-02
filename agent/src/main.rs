@@ -33,6 +33,10 @@ fn main() {
 		    .help("List all keys for the caller IAM identity."))
 		.subcommand(SubCommand::with_name("daemon")
 			.arg(Arg::with_name("bind-to")
+				.long("bind-to")
+				.short("b")
+				.takes_value(true)
+				.value_name("PATH")
 				.required(true))
 		    .help("Run the daemon, bind a UNIX domain socket."))
 		.get_matches();
