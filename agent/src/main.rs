@@ -81,7 +81,7 @@ struct Handler {
 }
 
 impl Handler {
-	fn list_identities(&mut self) -> ListIdentities {
+	fn list_identities(&self) -> ListIdentities {
 		let region = Region::default();
 
 		let mut request = SignedRequest::new("GET", "execute-api", &region, &format!("{}/{}", self.url.path(), "identities"));
@@ -100,7 +100,20 @@ impl SSHAgentHandler for Handler {
 	}
 
 	fn identities(&mut self) -> HandleResult<Response> {
-		unimplemented!()
+		let identities = self
+			.list_identities()
+			.identities
+			.into_iter()
+			.map(|identity| {
+
+
+				Identity {
+					key_blob: Vec::new(),
+					key_comment: String::new(),
+				}
+			})
+			.collect();
+		HandleResult::Ok(Response::Identities(identities))
 	}
 
 	fn sign_request(&mut self, pubkey: Vec<u8>, data: Vec<u8>, _flags: u32) -> HandleResult<Response> {
