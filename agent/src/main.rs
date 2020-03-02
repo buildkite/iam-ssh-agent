@@ -1,7 +1,7 @@
 use std::{fs, path::Path};
 use ssh_agent::{agent::Agent, proto::{Message, Identity, SignRequest, SignatureBlob}};
 use clap::{App, Arg, SubCommand};
-use rusoto_core::{region::Region, RusotoError, Client, signature::SignedRequest, request::HttpResponse};
+use rusoto_core::{region::Region, RusotoError, Client, signature::SignedRequest, request::{HttpResponse, BufferedHttpResponse}};
 use url::Url;
 use futures::future::Future;
 use serde::Deserialize;
@@ -28,17 +28,12 @@ enum SignError {
 }
 
 fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = ListIdentities, Error = RusotoError<ListIdentitiesError>> + Send> {
-	let response = match response.buffer().wait() {
-		Ok(body) => body,
-		Err(e) => return Box::new(futures::future::err(RusotoError::HttpDispatch(e))),
-	};
-
-	let body: ListIdentities = match serde_json::from_slice(&response.body) {
-		Ok(p) => p,
-		Err(e) => return Box::new(futures::future::err(RusotoError::ParseError(format!("{:?}", e)))),
-	};
-
-	Box::new(futures::future::ok(body))
+	Box::new(response.buffer().map_err(RusotoError::HttpDispatch).and_then(|buffered: BufferedHttpResponse| {
+		match serde_json::from_slice(&buffered.body) {
+			Ok(p) => Box::new(futures::future::ok(p)),
+			Err(e) => Box::new(futures::future::err(RusotoError::ParseError(format!("{:?}", e)))),
+		}
+	}))
 }
 
 fn parse_http_signature(response: HttpResponse) -> Box<dyn Future<Item = Signature, Error = RusotoError<SignError>> + Send> {
