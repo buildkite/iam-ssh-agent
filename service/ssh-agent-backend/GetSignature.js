@@ -56,19 +56,25 @@ exports.handler = async (event, context) => {
             if (privateKey.type == "ssh-rsa") {
                 if (flags == 2) {
                     // SSH_AGENT_RSA_SHA2_256
-                    signatureBlob = Buffer.concat([Buffer.from('rsa-sha2-256'), crypto.sign('sha256', decodedData, privateKey.getPrivatePEM())]);
+                    signatureBlob = [Buffer.from('rsa-sha2-256'), crypto.sign('sha256', decodedData, privateKey.getPrivatePEM())];
                 } else if (flags == 4) {
                     // SSH_AGENT_RSA_SHA2_512
-                    signatureBlob = Buffer.concat([Buffer.from('rsa-sha2-512'), crypto.sign('sha512', decodedData, privateKey.getPrivatePEM())]);
+                    signatureBlob = [Buffer.from('rsa-sha2-512'), crypto.sign('sha512', decodedData, privateKey.getPrivatePEM())];
                 } else {
                     // SSH_AGENT_RSA_SHA1
-                    signatureBlob = Buffer.concat([Buffer.from('ssh-rsa'), crypto.sign('sha1', decodedData, privateKey.getPrivatePEM())]);
+                    signatureBlob = [Buffer.from('ssh-rsa'), crypto.sign('sha1', decodedData, privateKey.getPrivatePEM())];
                 }
             } else {
-                signatureBlob = Buffer.concat(Buffer.from(privateKey.type), privateKey.sign(decodedData));
+                signatureBlob = [Buffer.from(privateKey.type), privateKey.sign(decodedData)];
             }
 
-            let encodedSignature = signatureBlob.toString('base64');
+            let typeLength = Buffer.alloc(4);
+            typeLength.writeUInt32BE(signatureBlob[0].length);
+
+            let sigLength = Buffer.alloc(4);
+            sigLength.writeUInt32BE(signatureBlob[1].length);
+
+            let encodedSignature = Buffer.concat([typeLength, signatureBlob[0], sigLength, signatureBlob[1]]).toString('base64');
 
             console.log(`fn=handler caller=${caller} key=${keyParameter} signature=${encodedSignature}`);
 
