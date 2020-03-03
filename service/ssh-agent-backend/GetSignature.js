@@ -68,12 +68,14 @@ exports.handler = async (event, context) => {
                 signatureBlob = Buffer.concat(Buffer.from(privateKey.type), privateKey.sign(decodedData));
             }
 
-            console.log(`fn=handler caller=${caller} key=${keyParameter} signature=${signatureBlob}`);
+            let encodedSignature = signatureBlob.toString('base64');
+
+            console.log(`fn=handler caller=${caller} key=${keyParameter} signature=${encodedSignature}`);
 
             return {
                 'statusCode': 200,
                 'body': JSON.stringify({
-                    signature: signatureBlob.toString('base64'),
+                    signature: encodedSignature,
                 }),
             }
         }
