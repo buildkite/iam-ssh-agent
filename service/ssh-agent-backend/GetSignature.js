@@ -49,8 +49,10 @@ exports.handler = async (event, context) => {
 
             // Depending on the parameter contents ssh2.utils.parseKey might
             // return a single key or a list of keys. We only support one.
-            let privateKey = [].concat(ssh2.utils.parseKey(fetchPrivateKeyForParameter(keyParameter)))[0];
+            let privateKey = [].concat(ssh2.utils.parseKey(await fetchPrivateKeyForParameter(keyParameter)))[0];
             let signature = privateKey.sign(decoded_data);
+
+            console.log(`fn=handler caller=${caller} key=${keyParameter} signature=${signature}`);
 
             return {
                 'statusCode': 200,
