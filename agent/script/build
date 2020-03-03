@@ -1,0 +1,5 @@
+#!/bin/bash
+
+docker build -t iam-ssh-agent --squash .
+docker tag iam-ssh-agent:latest keithduncan/iam-ssh-agent:latest
+docker push keithduncan/iam-ssh-agent:latest
