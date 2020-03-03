@@ -4,6 +4,11 @@ Description: >
   iam-ssh-agent
 
   Sample SAM Template for iam-ssh-agent
+
+Parameters:
+  AccountIds:
+    Type: CommaDelimitedList
+    Description: AWS AccountIds whose IAM entities should be allowed to access the API Gateway.
   
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -17,6 +22,8 @@ Globals:
     Auth:
       DefaultAuthorizer: AWS_IAM
       InvokeRole: NONE
+      ResourcePolicy:
+        AwsAccountWhitelist: !Ref AccountIds
     EndpointConfiguration: REGIONAL
 
 Resources:
