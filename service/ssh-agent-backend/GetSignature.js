@@ -47,12 +47,13 @@ exports.handler = async (event, context) => {
             }
             console.log(`fn=handler caller=${caller} key=${keyParameter} at=match`);
 
-            let privateKey = fetchPrivateKeyForParameter(keyParameter);
+            let privateKey = ssh2.utils.parseKey(fetchPrivateKeyForParameter(keyParameter));
+            let signature = privateKey.sign(decoded_data);
 
             return {
                 'statusCode': 200,
                 'body': JSON.stringify({
-                    signature: "",
+                    signature: signature.toString('base64'),
                 }),
             }
         }
