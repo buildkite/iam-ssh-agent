@@ -43,6 +43,15 @@ Resources:
           Properties:
             Path: /identities
             Method: get
+  ListIdentitiesLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: ListIdentitiesFunction
+    Properties:
+      RetentionInDays: 1
+      LogGroupName:
+        !Sub
+        - '/aws/lambda/${LambdaName}'
+        - LambdaName: !Ref ListIdentitiesFunction
   GetSignatureFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -61,6 +70,15 @@ Resources:
           Properties:
             Path: /signature
             Method: post
+  GetSignatureLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: GetSignatureFunction
+    Properties:
+      RetentionInDays: 1
+      LogGroupName:
+        !Sub
+        - '/aws/lambda/${LambdaName}'
+        - LambdaName: !Ref GetSignatureFunction
   ResourcePermissionTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
