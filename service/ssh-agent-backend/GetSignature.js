@@ -56,24 +56,24 @@ exports.handler = async (event, context) => {
             if (privateKey.type == "ssh-rsa") {
                 if (flags == 2) {
                     // SSH_AGENT_RSA_SHA2_256
-                    signature_blob = Buffer.concat(Buffer.from('rsa-sha2-256'), crypto.sign('sha256', decodedData, privateKey));
+                    signatureBlob = Buffer.concat(Buffer.from('rsa-sha2-256'), crypto.sign('sha256', decodedData, privateKey.getPrivatePEM()));
                 } else if (flags == 4) {
                     // SSH_AGENT_RSA_SHA2_512
-                    signature_blob = Buffer.concat(Buffer.from('rsa-sha2-512'), crypto.sign('sha512', decodedData, privateKey));
+                    signatureBlob = Buffer.concat(Buffer.from('rsa-sha2-512'), crypto.sign('sha512', decodedData, privateKey.getPrivatePEM()));
                 } else {
                     // SSH_AGENT_RSA_SHA1
-                    signature_blob = Buffer.concat(Buffer.from('ssh-rsa'), crypto.sign('sha1', decodedData, privateKey));
+                    signatureBlob = Buffer.concat(Buffer.from('ssh-rsa'), crypto.sign('sha1', decodedData, privateKey.getPrivatePEM()));
                 }
             } else {
-                signature_blob = Buffer.concat(Buffer.from(privateKey.type), privateKey.sign(decodedData));
+                signatureBlob = Buffer.concat(Buffer.from(privateKey.type), privateKey.sign(decodedData));
             }
 
-            console.log(`fn=handler caller=${caller} key=${keyParameter} signature=${signature_blob}`);
+            console.log(`fn=handler caller=${caller} key=${keyParameter} signature=${signatureBlob}`);
 
             return {
                 'statusCode': 200,
                 'body': JSON.stringify({
-                    signature: signature_blob.toString('base64'),
+                    signature: signatureBlob.toString('base64'),
                 }),
             }
         }
