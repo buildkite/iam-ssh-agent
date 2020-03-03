@@ -13,26 +13,30 @@ pub enum ListIdentitiesError {
 
 }
 
-fn to_base64<S>(vec: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
-where
-	S: serde::Serializer
-{
-    serializer.serialize_str(&base64::encode(&vec[..]))
-}
+mod base64 {
+	use serde::Deserialize;
 
-fn from_base64<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
-where
-	D: serde::Deserializer<'de>
-{
-	let s = <&str>::deserialize(deserializer)?;
-    base64::decode(s).map_err(serde::de::Error::custom)
+	pub fn serialize<S>(vec: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: serde::Serializer
+	{
+	    serializer.serialize_str(&base64::encode(&vec[..]))
+	}
+
+	pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+	where
+		D: serde::Deserializer<'de>
+	{
+		let s = <&str>::deserialize(deserializer)?;
+	    base64::decode(s).map_err(serde::de::Error::custom)
+	}
 }
 
 #[derive(Debug, Serialize)]
 pub struct SignRequest {
-	#[serde(serialize_with = "to_base64")]
+	#[serde(with = "base64")]
 	pubkey: Vec<u8>,
-	#[serde(serialize_with = "to_base64")]
+	#[serde(with = "base64")]
 	data: Vec<u8>,
 	flags: u32,
 }
@@ -49,7 +53,7 @@ impl From<super::SignRequest> for SignRequest {
 
 #[derive(Debug, Deserialize)]
 pub struct Signature {
-	#[serde(deserialize_with = "from_base64")]
+	#[serde(with = "base64")]
 	sig: Vec<u8>,
 }
 
