@@ -2,6 +2,7 @@ const AWS = require('aws-sdk');
 
 const lib = require('./lib.js');
 const ssh2 = require('./node_modules/ssh2-streams/index.js');
+const crypto = require('crypto');
 
 async function fetchPrivateKeyForParameter(keyParameter) {
     let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
@@ -24,8 +25,8 @@ exports.handler = async (event, context) => {
 
         let { pubkey, data, flags } = JSON.parse(event.body);
 
-        let decoded_pubkey = Buffer.from(pubkey, 'base64');
-        let decoded_data = Buffer.from(data, 'base64');
+        let decodedPubkey = Buffer.from(pubkey, 'base64');
+        let decodedData = Buffer.from(data, 'base64');
 
         // Find the parameter that stores the private/public key pair for blob
         // searching the list of keys the caller has access to.
@@ -34,14 +35,14 @@ exports.handler = async (event, context) => {
 
         for (const keyParameter of keyList) {
             let key = await lib.fetchPublicKeyForParameter(keyParameter);
-            let parsed_key = ssh2.utils.parseKey(key);
+            let parsedKey = ssh2.utils.parseKey(key);
 
             // pubkey is base64(pubkey bits)
             // decoded_pubkey is binary key bits
             //
             // key is a string rep of the public key with comment etc
             // parsed_key is an OpenSSH key from ssh2-streams
-            if (!decoded_pubkey.equals(parsed_key.getPublicSSH())) {
+            if (!decodedPubkey.equals(parsedKey.getPublicSSH())) {
                 console.log(`fn=handler caller=${caller} key=${keyParameter} at=skip`);
                 continue;
             }
@@ -50,14 +51,29 @@ exports.handler = async (event, context) => {
             // Depending on the parameter contents ssh2.utils.parseKey might
             // return a single key or a list of keys. We only support one.
             let privateKey = [].concat(ssh2.utils.parseKey(await fetchPrivateKeyForParameter(keyParameter)))[0];
-            let signature = privateKey.sign(decoded_data);
 
-            console.log(`fn=handler caller=${caller} key=${keyParameter} signature=${signature}`);
+            var signatureBlob;
+            if (privateKey.type == "ssh-rsa") {
+                if (flags == 2) {
+                    // SSH_AGENT_RSA_SHA2_256
+                    signature_blob = Buffer.concat(Buffer.from('rsa-sha2-256'), crypto.sign('sha256', decodedData, privateKey));
+                } else if (flags == 4) {
+                    // SSH_AGENT_RSA_SHA2_512
+                    signature_blob = Buffer.concat(Buffer.from('rsa-sha2-512'), crypto.sign('sha512', decodedData, privateKey));
+                } else {
+                    // SSH_AGENT_RSA_SHA1
+                    signature_blob = Buffer.concat(Buffer.from('ssh-rsa'), crypto.sign('sha1', decodedData, privateKey));
+                }
+            } else {
+                signature_blob = Buffer.concat(Buffer.from(privateKey.type), privateKey.sign(decodedData));
+            }
+
+            console.log(`fn=handler caller=${caller} key=${keyParameter} signature=${signature_blob}`);
 
             return {
                 'statusCode': 200,
                 'body': JSON.stringify({
-                    signature: signature.toString('base64'),
+                    signature: signature_blob.toString('base64'),
                 }),
             }
         }
