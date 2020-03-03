@@ -54,7 +54,7 @@ impl From<super::SignRequest> for SignRequest {
 #[derive(Debug, Deserialize)]
 pub struct Signature {
 	#[serde(with = "base64")]
-	sig: Vec<u8>,
+	signature: Vec<u8>,
 }
 
 #[derive(Debug)]
@@ -64,7 +64,7 @@ pub enum SignError {
 
 impl Into<SignatureBlob> for Signature {
 	fn into(self) -> SignatureBlob {
-		self.sig
+		self.signature
 	}
 }
 
