@@ -45,7 +45,7 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: !Ref ResourcePermissionTable
         - SSMParameterReadPolicy:
-            ParameterName: "*/deploy-key"
+            ParameterName: "*/deploy-key*"
         - KMSDecryptPolicy:
             KeyId: aws/ssm
       Events:
