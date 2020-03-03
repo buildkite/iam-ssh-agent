@@ -1,11 +1,9 @@
 use std::{fs, path::Path};
-use ssh_agent::{agent::Agent, proto::{Message, Identity, SignRequest, SignatureBlob}};
+use ssh_agent::agent::Agent;
 use clap::{App, Arg, SubCommand};
-use rusoto_core::{region::Region, RusotoError, Client, signature::SignedRequest};
 use url::Url;
-use openssh_keys::PublicKey;
 
-mod service;
+mod agent;
 
 fn main() {
     let matches = App::new("iam-ssh-agent")
@@ -27,7 +25,7 @@ fn main() {
 	// Uses an environment variable rather than an argument so that this can be
 	// an ECS ValueFrom in an ECS task.
 	let ssh_agent_backend_url = Url::parse(&std::env::var("IAM_SSH_AGENT_BACKEND_URL").expect("IAM_SSH_AGENT_BACKEND_URL is required")).expect("IAM_SSH_AGENT_BACKEND_URL is a valid url");
-	let agent = AgentBackend::new(ssh_agent_backend_url);
+	let agent = agent::Backend::new(ssh_agent_backend_url);
 
 	if let Some(_matches) = matches.subcommand_matches("list-keys") {
         eprintln!("{:#?}", agent.identities());
@@ -54,102 +52,4 @@ fn main() {
 	}
 
 	unimplemented!()
-}
-
-#[derive(Debug)]
-enum AgentBackendError {
-	ListIdentities(RusotoError<service::ListIdentitiesError>),
-	Sign(RusotoError<service::SignError>),
-	Unknown(String),
-}
-
-struct AgentBackend {
-	url: Url,
-}
-
-impl AgentBackend {
-	fn new(url: Url) -> Self {
-		Self {
-			url,
-		}
-	}
-
-	fn fetch_identities(&self) -> Result<service::ListIdentities, RusotoError<service::ListIdentitiesError>> {
-		let region = Region::default();
-
-		let mut request = SignedRequest::new("GET", "execute-api", &region, &format!("{}/{}", self.url.path(), "identities"));
-		request.set_hostname(Some(self.url.host_str().expect("url host").to_owned()));
-
-		Client::shared()
-			.sign_and_dispatch(request, service::parse_http_list_identities)
-			.sync()
-	}
-
-	fn identities(&self) -> Result<Vec<Identity>, AgentBackendError> {
-		let identities = self
-			.fetch_identities()
-			.map_err(AgentBackendError::ListIdentities)?
-			.identities
-			.into_iter()
-			.filter_map(|identity| {
-				PublicKey::parse(&identity).ok().map(|key| {
-					Identity {
-						pubkey_blob: key.data(),
-						comment: key.comment.unwrap_or(String::new()),
-					}
-				})
-			})
-			.collect();
-		Ok(identities)
-	}
-
-	fn fetch_signature(&self, request: &SignRequest) -> Result<service::Signature, RusotoError<service::SignError>> {
-		let request: service::SignRequest = request.clone().into();
-
-		let bytes = serde_json::to_vec(&request)
-			.map_err(|e| RusotoError::ParseError(format!("{:?}", e)))?;
-
-		let region = Region::default();
-
-		let mut request = SignedRequest::new("POST", "execute-api", &region, &format!("{}/{}", self.url.path(), "signature"));
-		request.set_hostname(Some(self.url.host_str().expect("url host").to_owned()));
-		request.set_payload(Some(bytes));
-		request.set_content_type("application/json".to_string());
-
-		Client::shared()
-			.sign_and_dispatch(request, service::parse_http_signature)
-			.sync()
-	}
-
-	fn sign(&self, request: &SignRequest) -> Result<SignatureBlob, AgentBackendError> {
-		let signature = self
-			.fetch_signature(request)
-			.map_err(AgentBackendError::Sign)?
-			.into();
-		Ok(signature)
-	}
-}
-
-impl Agent for AgentBackend {
-	type Error = AgentBackendError;
-
-	fn handle(&self, request: Message) -> Result<Message, Self::Error> {
-	    eprintln!("Request: {:#?}", request);
-
-	    let response = match request {
-			Message::RequestIdentities => {
-				Ok(Message::IdentitiesAnswer(self.identities()?))
-			},
-			Message::SignRequest(request) => {
-				Ok(Message::SignResponse(self.sign(&request)?))
-			},
-			_ => {
-				Err(AgentBackendError::Unknown(format!("received unsupported message: {:?}", request)))
-			},
-	    };
-
-	    eprintln!("Response {:#?}", response);
-
-	    response
-	}
 }
