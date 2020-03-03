@@ -56,13 +56,13 @@ exports.handler = async (event, context) => {
             if (privateKey.type == "ssh-rsa") {
                 if (flags == 2) {
                     // SSH_AGENT_RSA_SHA2_256
-                    signatureBlob = Buffer.concat(Buffer.from('rsa-sha2-256'), crypto.sign('sha256', decodedData, privateKey.getPrivatePEM()));
+                    signatureBlob = Buffer.concat([Buffer.from('rsa-sha2-256'), crypto.sign('sha256', decodedData, privateKey.getPrivatePEM())]);
                 } else if (flags == 4) {
                     // SSH_AGENT_RSA_SHA2_512
-                    signatureBlob = Buffer.concat(Buffer.from('rsa-sha2-512'), crypto.sign('sha512', decodedData, privateKey.getPrivatePEM()));
+                    signatureBlob = Buffer.concat([Buffer.from('rsa-sha2-512'), crypto.sign('sha512', decodedData, privateKey.getPrivatePEM())]);
                 } else {
                     // SSH_AGENT_RSA_SHA1
-                    signatureBlob = Buffer.concat(Buffer.from('ssh-rsa'), crypto.sign('sha1', decodedData, privateKey.getPrivatePEM()));
+                    signatureBlob = Buffer.concat([Buffer.from('ssh-rsa'), crypto.sign('sha1', decodedData, privateKey.getPrivatePEM())]);
                 }
             } else {
                 signatureBlob = Buffer.concat(Buffer.from(privateKey.type), privateKey.sign(decodedData));
