@@ -83,9 +83,7 @@ impl Agent for Backend {
 	type Error = BackendError;
 
 	fn handle(&self, request: Message) -> Result<Message, Self::Error> {
-	    eprintln!("Request: {:#?}", request);
-
-	    let response = match request {
+	    match request {
 			Message::RequestIdentities => {
 				Ok(Message::IdentitiesAnswer(self.identities()?))
 			},
@@ -95,10 +93,6 @@ impl Agent for Backend {
 			_ => {
 				Err(BackendError::Unknown(format!("received unsupported message: {:?}", request)))
 			},
-	    };
-
-	    eprintln!("Response {:#?}", response);
-
-	    response
+	    }
 	}
 }
