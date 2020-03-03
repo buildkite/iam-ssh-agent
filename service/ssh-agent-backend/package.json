@@ -6,13 +6,10 @@
   "author": "Keith Duncan",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0"
+    "ssh2-streams": "0.4.9"
   },
   "scripts": {
     "test": "mocha tests/unit/"
   },
-  "devDependencies": {
-    "chai": "^4.2.0",
-    "mocha": "^6.1.4"
-  }
+  "devDependencies": {}
 }
