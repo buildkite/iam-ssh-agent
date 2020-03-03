@@ -35,5 +35,13 @@ exports.fetchPublicKeyForParameter = async (keyParameter) => {
         Name: `${keyParameter}.pub`,
     }).promise();
 
-    return response.Parameter.Value;
+    let value = response.Parameter.Value;
+
+    let components = value.split(' ');
+    if (components.length == 3) {
+        components.pop();
+    }
+    components.push(response.Parameter.ARN);
+
+    return components.join(' ');
 };
