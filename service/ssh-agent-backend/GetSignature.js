@@ -41,12 +41,12 @@ exports.handler = async (event, context) => {
             //
             // key is a string rep of the public key with comment etc
             // parsed_key is an OpenSSH key from ssh2-streams
-            if (decoded_pubkey != parsed_key.getPublicSSH()) {
+            if (!decoded_pubkey.equals(parsed_key.getPublicSSH())) {
                 console.log(`fn=handler caller=${caller} key=${keyParameter} at=skip`);
                 continue;
             }
             console.log(`fn=handler caller=${caller} key=${keyParameter} at=match`);
-            
+
             let privateKey = fetchPrivateKeyForParameter(keyParameter);
 
             return {
