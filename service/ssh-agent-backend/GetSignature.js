@@ -29,7 +29,7 @@ exports.handler = async (event, context) => {
 
         // Find the parameter that stores the private/public key pair for blob
         // searching the list of keys the caller has access to.
-        let keyList = await lib.fetchKeyParametersListForCaller(caller);
+        let keyList = await lib.fetchKeyParameterListForCaller(caller);
         console.log(`fn=handler caller=${caller} keys=${keyList.join(',')}`);
 
         for (const keyParameter of keyList) {
