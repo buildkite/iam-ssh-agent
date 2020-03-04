@@ -85,9 +85,11 @@ impl Agent for Backend {
 	fn handle(&self, request: Message) -> Result<Message, Self::Error> {
 	    match request {
 			Message::RequestIdentities => {
+				eprintln!("at=list_identities");
 				Ok(Message::IdentitiesAnswer(self.identities()?))
 			},
 			Message::SignRequest(request) => {
+				eprintln!("at=sign");
 				Ok(Message::SignResponse(self.sign(&request)?))
 			},
 			_ => {
