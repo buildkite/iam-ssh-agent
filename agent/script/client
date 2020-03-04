@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec docker run --rm -it --entrypoint bash -v ssh-socket:/ssh --env SSH_AUTH_SOCK=/ssh/socket buildkite-agent
