@@ -36,7 +36,7 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: !Ref ResourcePermissionTable
         - SSMParameterReadPolicy:
-            ParameterName: "*/deploy-key.pub"
+            ParameterName: "*/key.pub"
       Events:
         SSHAgentBackend:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -61,7 +61,7 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: !Ref ResourcePermissionTable
         - SSMParameterReadPolicy:
-            ParameterName: "*/deploy-key*"
+            ParameterName: "*/key*"
         - KMSDecryptPolicy:
             KeyId: aws/ssm
       Events:
