@@ -70,6 +70,8 @@ impl Into<SignatureBlob> for Signature {
 
 pub fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item = ListIdentities, Error = RusotoError<ListIdentitiesError>> + Send> {
 	Box::new(response.buffer().map_err(RusotoError::HttpDispatch).and_then(|buffered: BufferedHttpResponse| {
+		eprintln!("mod=service fn=parse_http_list_identities response={:?}", buffered);
+
 		match serde_json::from_slice(&buffered.body) {
 			Ok(p) => Box::new(futures::future::ok(p)),
 			Err(e) => Box::new(futures::future::err(RusotoError::ParseError(format!("{:?}", e)))),
@@ -79,6 +81,8 @@ pub fn parse_http_list_identities(response: HttpResponse) -> Box<dyn Future<Item
 
 pub fn parse_http_signature(response: HttpResponse) -> Box<dyn Future<Item = Signature, Error = RusotoError<SignError>> + Send> {
 	Box::new(response.buffer().map_err(RusotoError::HttpDispatch).and_then(|buffered: BufferedHttpResponse| {
+		eprintln!("mod=service fn=parse_http_signature response={:?}", buffered);
+
 		match serde_json::from_slice(&buffered.body) {
 			Ok(p) => Box::new(futures::future::ok(p)),
 			Err(e) => Box::new(futures::future::err(RusotoError::ParseError(format!("{:?}", e)))),
