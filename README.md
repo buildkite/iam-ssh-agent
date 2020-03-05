@@ -51,8 +51,8 @@ Key permissions are stored in a DynamoDB table keyed by IAM Entity Unique ID.
 Deploy the service to an account using the `sam` command line tool or AWS
 Serverless Application Repository [TBD].
 
-Once you have successfully deployed the service you can [add keys](#adding-keys)
-and [grant access](#granting-access-to-keys).
+Once you have successfully deployed the service you can [add keys](#adding-keys),
+[grant access](#granting-access-to-keys), and [test access](#testing-access).
 
 ### Adding Keys
 
@@ -218,47 +218,28 @@ to restrict access from inside your VPC to the `iam-ssh-agent` backend.
 See the [AWS Private API troubleshooting guide](https://aws.amazon.com/premiumsupport/knowledge-center/api-gateway-private-endpoint-connection/)
 for more tips on troubleshooting access to Private API Gateways.
 
-## Example Usage
+## Testing Access
 
-I use this to provide my [Buildkite](https://buildkite.com) agents
+I use this project to provide my [Buildkite](https://buildkite.com) agents
 [running on ECS](https://github.com/keithduncan/buildkite-on-demand) access to
 ssh keys to clone source code repositories.
 
-Since my iam-ssh-agent service is deployed to a separate AWS account, to grant
-access to the API Gateway I attach a policy to the ECS task role:
+To use the `iam-ssh-agent` service in ECS Tasks I add a sidecar container which
+uses the [keithduncan/iam-ssh-agent](https://hub.docker.com/repository/docker/keithduncan/iam-ssh-agent)
+docker image to my task definitions. The task definition also uses a bind mount
+volume to expose the unix domain socket bound by `iam-ssh-agent` to the Buildkite
+agent container which invokes `ssh`.
 
-```yaml
-ProjectRole:
-  Type: AWS::IAM::Role
-  Properties:
-    Path: /BuildkiteAgentTask/
-    RoleName: ProjectName
-    AssumeRolePolicyDocument:
-      Statement:
-      - Effect: Allow
-        Principal:
-          Service: [ecs-tasks.amazonaws.com]
-        Action: ['sts:AssumeRole']
-    Policies:
-      - PolicyName: SshAgentApi
-        PolicyDocument:
-          Statement:
-            - Effect: Allow
-              Action: execute-api:Invoke
-              Resource:
-                !Ref YourIamSshAgentApiGatewayArnHere
-```
+To ensure the `iam-ssh-agent` container has booted, the main container uses a
+container dependency `DependsOn: [{"Condition": "HEALTHY", "ContainerName": "ssh-agent"}]`
+condition to wait for the ssh-agent to boot and become healthy before starting,
+and the sidecar container defines a healthcheck which uses busybox to verify the
+socket has been bound.
 
-To use the iam-ssh-agent backend in my ECS Task I add a sidecar container which
-includes the ssh-agent binary and use a bind mount volume to expose the unix
-domain socket to the Buildkite agent container.
-
-The sidecar container defines a healthcheck which uses busybox to verify the
-socket is bound, and the main container uses a `DependsOn: [{"Condition": "HEALTHY", "ContainerName": "ssh-agent"}]`
-condition to wait for the ssh-agent to boot and become healthy before starting.
-
-An example task definition which runs prints which keys the container has access
-to by way of the IAM role passed when scheduling the task is shown below:
+An example task definition which prints which keys the container has access
+to, based on the task IAM role passed when scheduling the ECS task, is shown
+below. This task definition can be useful for diagnosing `ssh` access issues
+and confirming that your ECS Task Role has access to the keys you expect.
 
 ```yaml
 SshTaskDefinition:
@@ -322,6 +303,31 @@ SshTaskDefinition:
       - FARGATE
     Volumes:
       - Name: ssh-agent
+```
+
+Since my `iam-ssh-agent` service is deployed to a separate AWS account, my
+ECS task role has a policy to explicitly grant access to the API Gateway:
+
+```yaml
+ProjectRole:
+  Type: AWS::IAM::Role
+  Properties:
+    Path: /BuildkiteAgentTask/
+    RoleName: ProjectName
+    AssumeRolePolicyDocument:
+      Statement:
+      - Effect: Allow
+        Principal:
+          Service: [ecs-tasks.amazonaws.com]
+        Action: ['sts:AssumeRole']
+    Policies:
+      - PolicyName: SshAgentApi
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: execute-api:Invoke
+              Resource:
+                !Ref YourIamSshAgentApiGatewayArnHere
 ```
 
 For more details on running Buildkite agents on-demand with ECS see my
