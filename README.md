@@ -181,3 +181,113 @@ IAM entity must be granted an explicit allow with an IAM Policy Statement:
 
 See the [API Gateway Authorization Flow](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-authorization-flow.html)
 documentation for more details.
+
+## Example Usage
+
+I use this to provide my [Buildkite](https://buildkite.com) agents
+[running on ECS](https://github.com/keithduncan/buildkite-on-demand) access to
+ssh keys to clone source code repositories.
+
+Since my iam-ssh-agent service is deployed to a separate AWS account, to grant
+access to the API Gateway I attach a policy to the ECS task role:
+
+```yaml
+ProjectRole:
+  Type: AWS::IAM::Role
+  Properties:
+    Path: /BuildkiteAgentTask/
+    RoleName: ProjectName
+    AssumeRolePolicyDocument:
+      Statement:
+      - Effect: Allow
+        Principal:
+          Service: [ecs-tasks.amazonaws.com]
+        Action: ['sts:AssumeRole']
+    Policies:
+      - PolicyName: SshAgentApi
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: execute-api:Invoke
+              Resource:
+                !Ref YourIamSshAgentApiGatewayArnHere
+```
+
+To use the iam-ssh-agent backend in my ECS Task I add a sidecar container which
+includes the ssh-agent binary and use a bind mount volume to expose the unix
+domain socket to the Buildkite agent container.
+
+The sidecar container defines a healthcheck which uses busybox to verify the
+socket is bound, and the main container uses a `DependsOn: [{"Condition": "HEALTHY", "ContainerName": "ssh-agent"}]`
+condition to wait for the ssh-agent to boot and become healthy before starting.
+
+An example task definition which runs prints which keys the container has access
+to by way of the IAM role passed when scheduling the task is shown below:
+
+```yaml
+SshTaskDefinition:
+  Type: AWS::ECS::TaskDefinition
+  Properties:
+    Family: ssh-example
+    ContainerDefinitions:
+      - Name: agent
+        EntryPoint:
+          - /bin/sh
+          - -c
+        Command:
+          - ssh-add -L; ssh -vvvvT git@github.com
+        Essential: true
+        Image: buildkite/agent:3
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-region: !Ref AWS::Region
+            awslogs-group: /aws/ecs/ssh
+            awslogs-stream-prefix: ecs
+        Environment:
+          - Name: SSH_AUTH_SOCK
+            Value: /ssh/socket
+        DependsOn:
+          - Condition: HEALTHY
+            ContainerName: ssh-agent
+        MountPoints:
+          - ContainerPath: /ssh
+            SourceVolume: ssh-agent
+      - Name: ssh-agent
+        Command:
+          - /usr/bin/iam-ssh-agent
+          - daemon
+          - --bind-to=/ssh/socket
+        Essential: true
+        Image: keithduncan/iam-ssh-agent:latest
+        Environment:
+          - Name: IAM_SSH_AGENT_BACKEND_URL
+            Value: !Ref YourIamSshAgentBackendUrlHere
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-region: !Ref AWS::Region
+            awslogs-group: /aws/ecs/ssh
+            awslogs-stream-prefix: ecs
+        HealthCheck:
+          Command:
+            - /bin/busybox
+            - test
+            - -S
+            - /ssh/socket
+        MountPoints:
+          - ContainerPath: /ssh
+            SourceVolume: ssh-agent
+    Cpu: 256
+    Memory: 512
+    NetworkMode: awsvpc
+    ExecutionRoleArn: !ImportValue agent-scheduler-ECSTaskExecutionRoleArn
+    RequiresCompatibilities:
+      - FARGATE
+    Volumes:
+      - Name: ssh-agent
+```
+
+For more details on running Buildkite agents on-demand with ECS see my
+[agent-scheduler](https://github.com/keithduncan/buildkite-on-demand/tree/master/agent-scheduler)
+project.
