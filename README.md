@@ -38,9 +38,10 @@ IAM entity.
 ## Service
 
 You can choose whether to deploy the service to the same account as your CI
-workload or a separate account. Access to the API Gateway is restricted by AWS
-Account ID. If you wanted to further restrict access you might consider creating
-a Private API Gateway and using VPC endpoints.
+workload or a separate account. You can also choose whether to create a Regional
+or Private endpoint. Access to a Regional endpoint can be restricted by
+AWS Account ID, while a Private endpoint allows fine grained restriction by
+source VPC or VPC Endpoint.
 
 Keys are stored in AWS Systems Manager Parameter Store where the private keys
 can be encrypted with a KMS key.
