@@ -6,19 +6,38 @@ Description: >
   API Gateway, Lambda functions and DynamoDB table to store permissions.
 
 Parameters:
-  AccountIds:
-    Type: CommaDelimitedList
-    Description: AWS AccountIds whose IAM entities should be allowed to access the API Gateway.
-  SourceVpcIds:
-    Type: CommaDelimitedList
-    Description: AWS VPC IDs whose occupants should be allowed to access the API Gateway.
   EndpointConfiguration:
     Type: String
     AllowedValues:
       - REGIONAL
       - PRIVATE
     Default: REGIONAL
-    Description: What kind of API Gateway do you want to create? REGIONAL can be accessed from anywhere including the public Internet (authenticated with IAM credentials), PRIVATE can be restricted to specific VPCs using AWS PrivateLink (additional costs apply).
+    Description: REGIONAL can be accessed from anywhere including the public Internet (authenticated with IAM credentials), PRIVATE is restricted to specific VPCs using AWS PrivateLink (additional costs apply).
+  AccountIds:
+    Type: CommaDelimitedList
+    Description: AWS AccountIds whose IAM entities should be allowed to access the API Gateway, used when EndpointConfiguration is REGIONAL.
+  SourceVpcIds:
+    Type: CommaDelimitedList
+    Description: AWS VPC IDs whose occupants should be allowed to access the API Gateway, used when EndpointConfiguration is PRIVATE.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Endpoint Configuration
+        Parameters:
+          - EndpointConfiguration
+      - Label:
+          default: Access Control
+        Parameters:
+          - AccountIds
+          - SourceVpcIds
+    ParameterLabels:
+      EndpointConfiguration:
+        default: What kind of API Gateway do you want to create?
+
+Conditions:
+  IsPrivate: !Equals [ !Ref EndpointConfiguration, "PRIVATE" ]
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -33,8 +52,8 @@ Globals:
       DefaultAuthorizer: AWS_IAM
       InvokeRole: NONE
       ResourcePolicy:
-        AwsAccountWhitelist: !Ref AccountIds
-        SourceVpcWhitelist: !Ref SourceVpcIds
+        AwsAccountWhitelist: !If [ !Not [!Ref IsPrivate], !Ref AccountIds, !Ref AWS::NoValue ]
+        SourceVpcWhitelist: !If [ !Ref IsPrivate, !Ref SourceVpcIds, !Ref AWS::NoValue ]
     EndpointConfiguration: !Ref EndpointConfiguration
 
 Resources:
