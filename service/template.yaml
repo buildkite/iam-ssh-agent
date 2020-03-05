@@ -93,3 +93,6 @@ Outputs:
   Api:
     Description: "API Gateway endpoint URL for Prod stage for SSH Agent Backend"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  PermissionsTable:
+    Description: "DynamoDB table for IAM entity ssh key permissions"
+    Value: !Ref ResourcePermissionTable
