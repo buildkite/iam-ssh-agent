@@ -9,6 +9,9 @@ Parameters:
   AccountIds:
     Type: CommaDelimitedList
     Description: AWS AccountIds whose IAM entities should be allowed to access the API Gateway.
+  SourceVpcIds:
+    Type: CommaDelimitedList
+    Description: AWS VPC IDs whose occupants should be allowed to access the API Gateway.
   EndpointConfiguration:
     Type: String
     AllowedValues:
@@ -16,7 +19,7 @@ Parameters:
       - PRIVATE
     Default: REGIONAL
     Description: What kind of API Gateway do you want to create? REGIONAL can be accessed from anywhere including the public Internet (authenticated with IAM credentials), PRIVATE can be restricted to specific VPCs using AWS PrivateLink (additional costs apply).
-  
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
@@ -31,6 +34,7 @@ Globals:
       InvokeRole: NONE
       ResourcePolicy:
         AwsAccountWhitelist: !Ref AccountIds
+        SourceVpcWhitelist: !Ref SourceVpcIds
     EndpointConfiguration: !Ref EndpointConfiguration
 
 Resources:
