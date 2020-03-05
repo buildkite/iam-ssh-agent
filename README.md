@@ -16,8 +16,8 @@ for the `iam-ssh-agent` binary.
 
 ## Agent
 
-`iam-ssh-agent` is designed to be used in less trusted environments like
-continuous integration where you want to use an ssh key to clone source control
+`iam-ssh-agent` is designed to be used in less trusted continuous integration
+environments where you want to use an ssh key to clone source control
 repositories without granting access to the raw key material.
 
 The agent binary should be a near drop in replacement for existing uses of
