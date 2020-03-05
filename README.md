@@ -9,7 +9,10 @@ a unix domain socket with the ssh-agent protocol.
 
 ## Agent
 
-iam-ssh-agent is designed to be used in less trusted environments like
+The [agent](https://github.com/keithduncan/iam-ssh-agent/tree/master/agent)
+subdirectory contains a Rust crate that builds the `iam-ssh-agent` binary.
+
+`iam-ssh-agent` is designed to be used in less trusted environments like
 continuous integration where you want to use an ssh key to clone source control
 repositories without granting access to the raw key material.
 
@@ -29,6 +32,10 @@ provide access to keys listed in the DynamoDB Permissions table for the caller's
 IAM entity.
 
 ## Service
+
+The [service](https://github.com/keithduncan/iam-ssh-agent/tree/master/service)
+subdirectory contains an AWS SAM project that deploys the serverless backend
+for the `iam-ssh-agent` binary.
 
 You can choose whether to deploy the service to the same account as your CI
 workload or a separate account. Access to the API Gateway is restricted by AWS
