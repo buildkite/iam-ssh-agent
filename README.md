@@ -182,6 +182,31 @@ IAM entity must be granted an explicit allow with an IAM Policy Statement:
 See the [API Gateway Authorization Flow](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-authorization-flow.html)
 documentation for more details.
 
+### Private Endpoint Configuration
+
+When configuring the API Gateway with `EndpointConfiguration: PRIVATE` some
+additional configuration may be necessary.
+
+Configure a VPC Endpoint for `execute-api` in the VPC you want to have access
+to the API Gateway.
+
+If Private DNS is enabled all `execute-api` requests will be routed via this
+endpoint. If this is not appropriate for your VPC, you can [associate the API Gateway with the VPC Endpoint](https://docs.aws.amazon.com/apigateway/latest/developerguide/associate-private-api-with-vpc-endpoint.html)
+and use the Route 53 alias DNS name for your private API gateway.
+
+`iam-ssh-agent` supports connecting to Private DNS Names or a Route 53 alias, it
+does not support Endpoint-Specific Public DNS Hostnames. See
+[How to Invoke a Private API](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-api-test-invoke-url.html) for details on these options.
+
+You may wish to change the API Gateway Resource Policy (ensure you redeploy the
+API after any changes) or set a [VPC Endpoint Policy](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-vpc-endpoint-policies.html)
+to restrict access from inside your VPC to the `iam-ssh-agent` backend.
+
+Ensure the VPC Endpoint is addedd to security groups that allow inbound network
+traffic from the security group that `iam-ssh-agent` binary is executing in.
+
+See the [AWS Private API troubleshooting guide](https://aws.amazon.com/premiumsupport/knowledge-center/api-gateway-private-endpoint-connection/) for more tips.
+
 ## Example Usage
 
 I use this to provide my [Buildkite](https://buildkite.com) agents
