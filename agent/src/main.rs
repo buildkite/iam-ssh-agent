@@ -6,6 +6,8 @@ use url::Url;
 mod agent;
 
 fn main() {
+	let _ = env_logger::try_init();
+
     let matches = App::new("iam-ssh-agent")
 		.version("0.1.0")
 		.author("Keith Duncan <keith_duncan@me.com>")
