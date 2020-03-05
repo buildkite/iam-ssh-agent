@@ -56,10 +56,10 @@ and [grant access](#granting-access-to-keys).
 
 ### Adding Keys
 
-You can add keys using the AWS Console. Keys are stored in the AWS Systems
-Manager Parameter Store. The public and private keys are stored separately. The
-ListIdentities lambda is granted access to the public keys and the GetSignature
-lambda is granted access to both.
+You can add keys to AWS Systems Manager Parameter Store using the AWS CLI or
+Console. The public and private keys are stored in separate parameters, the
+ListIdentities lambda is granted access to the public key parameters and the
+GetSignature lambda is granted access to both.
 
 You can use any hierarchy to store your public and private keys in SSM so long
 as the parameter paths end in `key.pub` and `key` respectively.
@@ -137,7 +137,7 @@ for more details on IAM Unique IDs.
 
 Once you have the Unique ID for the entity you want to grant access to, you can
 create an item in the DynamoDB table. You can add an item using the AWS CLI or
-console.
+Console.
 
 ```
 aws dynamodb update-item \
