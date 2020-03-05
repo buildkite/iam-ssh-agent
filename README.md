@@ -4,8 +4,8 @@ A replacement ssh-agent that uses the caller's IAM identity to access a list of
 permitted ssh identities.
 
 iam-ssh-agent is split into two components; a serverless API that uses API
-Gateway and Lambda functions to list and sign data, and a binary that binds a
-unix domain socket with the ssh-agent protocol.
+Gateway and Lambda functions to list keys and sign data, and a binary that binds
+a unix domain socket with the ssh-agent protocol.
 
 ## Agent
 
