@@ -91,8 +91,9 @@ Example key hierarchies:
 Once you have [added the keys](#adding-keys) to the parameter store, you can
 grant access to those keys to IAM entities.
 
-Use the AWS CLI look up the Unique ID for the IAM entity, these are not exposed
-in the AWS Console, for roles use `get-role` and copy the `RoleId`:
+Use the AWS CLI look up the Unique ID for the IAM entity to be granted access.
+These are not exposed in the AWS Console, for roles use `get-role` and copy
+the `RoleId`:
 
 ```
 aws iam get-role --role-name MyRole
@@ -136,8 +137,8 @@ See [IAM Identifiers Unique ID](https://docs.aws.amazon.com/IAM/latest/UserGuide
 for more details on IAM Unique IDs.
 
 Once you have the Unique ID for the entity you want to grant access to, you can
-create an item in the DynamoDB table. You can add an item using the AWS CLI or
-Console.
+create an item in the DynamoDB permissions table. You can add an item using the
+AWS CLI or Console.
 
 ```
 aws dynamodb update-item \
@@ -162,18 +163,19 @@ Global Deploy key whose access is limited to specific repositories.
 ### Granting Access to the API Gateway
 
 How to grant access to the API Gateway to list keys and sign data is determined
-by whether you deploy the service to the same account as your calling IAM roles
+by whether you deploy the service to the same account as your calling IAM entities
 or a different account.
 
-When using an API Gateway deployed to the same account access you don't have to
-provide explicit access in the IAM entity policies, the API Gateway resource is
-enough to grant access. An explicit deny on an IAM entity is of course
+When using an API Gateway deployed to the same account, you don't have to provide
+explicit access in the IAM entity policies, the API Gateway Resource Policy is
+enough to grant access. An explicit deny in an IAM Policy is of course
 respected.
 
 When using an API Gateway deployed to a separate account (cross account IAM
-access) you must allow access in both accounts. The API Gateway's resource
-policy must include the calling account’s account ID, and the calling account’s
-IAM entity must be granted an explicit allow with an IAM Policy Statement:
+access) you must configure access in both accounts. The API Gateway's resource
+policy must include the calling account’s account ID (or source VPC / VPC Endpoint
+if using a Private endpoint), and the calling account’s IAM entity must be granted
+an explicit allow with an IAM Policy Statement:
 
 ```json
 {
@@ -195,12 +197,15 @@ documentation for more details.
 When configuring the API Gateway with `EndpointConfiguration: PRIVATE` some
 additional configuration may be necessary.
 
-Configure a VPC Endpoint for `execute-api` in the VPC you want to have access
-to the API Gateway.
+First you must configure a VPC Endpoint for `execute-api` in the VPC you want
+to have access to the API Gateway. Ensure the VPC Endpoint security groups
+allow inbound network traffic from the security group that `iam-ssh-agent`
+binary will execute in.
 
-If Private DNS is enabled all `execute-api` requests will be routed via this
-endpoint. If this is not appropriate for your VPC, you can [associate the API Gateway with the VPC Endpoint](https://docs.aws.amazon.com/apigateway/latest/developerguide/associate-private-api-with-vpc-endpoint.html)
-and use the Route 53 alias DNS name for your private API gateway.
+If Private DNS is enabled, all `execute-api` requests from this VPC will be
+routed via this endpoint. If this is not appropriate for your VPC, you can
+[associate the API Gateway with the VPC Endpoint](https://docs.aws.amazon.com/apigateway/latest/developerguide/associate-private-api-with-vpc-endpoint.html)
+and use the Route 53 alias DNS name for your private API gateway instead.
 
 `iam-ssh-agent` supports connecting to Private DNS Names or a Route 53 alias, it
 does not support Endpoint-Specific Public DNS Hostnames. See
@@ -210,10 +215,8 @@ You may wish to change the API Gateway Resource Policy (ensure you redeploy the
 API after any changes) or set a [VPC Endpoint Policy](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-vpc-endpoint-policies.html)
 to restrict access from inside your VPC to the `iam-ssh-agent` backend.
 
-Ensure the VPC Endpoint is addedd to security groups that allow inbound network
-traffic from the security group that `iam-ssh-agent` binary is executing in.
-
-See the [AWS Private API troubleshooting guide](https://aws.amazon.com/premiumsupport/knowledge-center/api-gateway-private-endpoint-connection/) for more tips.
+See the [AWS Private API troubleshooting guide](https://aws.amazon.com/premiumsupport/knowledge-center/api-gateway-private-endpoint-connection/)
+for more tips on troubleshooting access to Private API Gateways.
 
 ## Example Usage
 
