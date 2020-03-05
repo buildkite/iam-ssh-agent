@@ -20,6 +20,7 @@ fn main() {
 				.value_name("PATH")
 				.required(true))
 		    .help("Run the daemon, bind a UNIX domain socket."))
+		.setting(clap::AppSettings::SubcommandRequired)
 		.get_matches();
 
 	// Uses an environment variable rather than an argument so that this can be
@@ -33,23 +34,22 @@ fn main() {
 	}
 
 	if let Some(matches) = matches.subcommand_matches("daemon") {
+		// TODO support exec mode and export SSH_AUTH_SOCK
+
 		let pipe = matches.value_of("bind-to").expect("bind-to is required");
         let pipe = Path::new(pipe);
 
         if fs::metadata(&pipe).is_ok() {
             if let Ok(_) = fs::remove_file(&pipe){
-                println!("Pipe deleted");
+                println!("pipe deleted");
             }
         }
 
         eprintln!("binding to {}", pipe.display());
 
         let _ = agent.run_unix(&pipe);
-
-        // TODO support exec mode and export SSH_AUTH_SOCK
-
 		return;
 	}
 
-	unimplemented!()
+	unreachable!()
 }
