@@ -1,15 +1,12 @@
 {
   "name": "ssh-agent-backend",
-  "version": "1.0.0",
-  "description": "ssh-agent-backend lambda functions",
+  "version": "0.1.0",
+  "description": "iam-ssh-agent backend lambda functions",
   "repository": "https://github.com/keithduncan/iam-ssh-agent",
   "author": "Keith Duncan",
   "license": "MIT",
   "dependencies": {
     "ssh2-streams": "0.4.9"
-  },
-  "scripts": {
-    "test": "mocha tests/unit/"
   },
   "devDependencies": {}
 }
