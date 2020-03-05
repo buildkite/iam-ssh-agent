@@ -7,19 +7,19 @@ mod agent;
 
 fn main() {
     let matches = App::new("iam-ssh-agent")
-		.version("1.0")
+		.version("0.1.0")
 		.author("Keith Duncan <keith_duncan@me.com>")
-		.about("Use an AWS IAM SSH Agent backend for SSH Authentication")
+		.about("Forward ssh list and sign operations to an iam-ssh-agent backend, receive access to keys based on your IAM identity.")
 		.subcommand(SubCommand::with_name("list-keys")
-		    .help("List all keys for the caller IAM identity."))
+			.about("List all keys for the caller's IAM identity."))
 		.subcommand(SubCommand::with_name("daemon")
+			.about("Run the daemon, bind a UNIX domain socket to provide ssh list and sign operations.")
 			.arg(Arg::with_name("bind-to")
 				.long("bind-to")
 				.short("b")
 				.takes_value(true)
 				.value_name("PATH")
-				.required(true))
-		    .help("Run the daemon, bind a UNIX domain socket."))
+				.required(true)))
 		.setting(clap::AppSettings::SubcommandRequired)
 		.get_matches();
 
