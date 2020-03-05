@@ -7,11 +7,10 @@ iam-ssh-agent is split into two components; a serverless API that uses API
 Gateway and Lambda functions to list keys and sign data, and a binary that binds
 a unix domain socket with the ssh-agent protocol.
 
-The [`/agent`](https://github.com/keithduncan/iam-ssh-agent/tree/master/agent)
-subdirectory contains a Rust crate that builds the `iam-ssh-agent` binary.
-
-The [`/service`](https://github.com/keithduncan/iam-ssh-agent/tree/master/service)
-subdirectory contains an AWS SAM project that deploys the serverless backend
+- [`/agent`](https://github.com/keithduncan/iam-ssh-agent/tree/master/agent)
+contains a Rust crate that builds the `iam-ssh-agent` binary.
+- [`/service`](https://github.com/keithduncan/iam-ssh-agent/tree/master/service)
+contains an AWS SAM project that deploys the serverless backend
 for the `iam-ssh-agent` binary.
 
 ## Agent
