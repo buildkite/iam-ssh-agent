@@ -28,7 +28,7 @@ exports.fetchKeyParameterListForCaller = async (caller) => {
     return parameters.SS;
 };
 
-exports.fetchPublicKeyForParameter = async (keyParameter) => {
+async function fetchPublicKeyForParameter(keyParameter) {
     let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
 
     let response = await ssm.getParameter({
@@ -44,4 +44,12 @@ exports.fetchPublicKeyForParameter = async (keyParameter) => {
     components.push(response.Parameter.ARN);
 
     return components.join(' ');
+}
+
+exports.fetchPublicKeyForParameter = fetchPublicKeyForParameter;
+
+exports.fetchPublicKeysForParameters = async (keyParameters) => {
+    Promise.all(keyParameters.map((keyParameter) => {
+        fetchPublicKeyForParameter(keyParameter)
+    }));
 };
