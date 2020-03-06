@@ -238,7 +238,9 @@ socket has been bound.
 An example task definition which prints which keys the container has access
 to, based on the task IAM role passed when scheduling the ECS task, is shown
 below. This task definition can be useful for diagnosing `ssh` access issues
-and confirming that your ECS Task Role has access to the keys you expect.
+and confirming that your ECS Task Role has access to the keys you expect. Ensure
+you override the Task Role when scheduling this task otherwise it won't have access
+to any keys.
 
 ```yaml
 SshTaskDefinition:
