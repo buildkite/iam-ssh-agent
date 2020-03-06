@@ -50,32 +50,32 @@ async function fetchPublicKeyForParameter(keyParameter) {
 
 exports.fetchPublicKeyForParameter = fetchPublicKeyForParameter;
 
-function* chunkArrayInGroups(arr, size) {
-  for (var i=0; i<arr.length; i+=size)
-    yield arr.slice(i, i+size);
+function chunkArrayInGroups(arr, chunkSize) {
+    var groups = [], i;
+    for (i = 0; i < arr.length; i += chunkSize) {
+        groups.push(arr.slice(i, i + chunkSize));
+    }
+    return groups;
 }
 
 exports.fetchPublicKeysForParameters = async (keyParameters) => {
     let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
 
     // Fetch up to 10 parameters at a time
-    let groups = chunkArrayInGroups(keyParameters.map((keyParameter) => {
-        `${keyParameter}.pub`
-    }), 10);
+    var groups = chunkArrayInGroups(keyParameters.map(keyParameter => `${keyParameter}.pub`), 10);
 
-    let responses = await Promise.all(groups.map((keyParameters) => {
-        return ssm.getParameters({
+    let responses = await Promise.all(groups.map(async (keyParameters) => {
+        let response = await ssm.getParameters({
             Names: keyParameters,
-        })
+        }).promise();
+        
+        return response.Parameters;
     }));
 
-    let parameters = responses
-        .map((response) => {
-            response.Parameters
-        })
-        .flat();
+    let parameters = responses.flat();
 
-    return parameters.map((parameter) => {
-        return replaceKeyCommentWithParameterArn(parameter.Value, parameter.ARN);
-    });
+    return parameters
+        .map((parameter) => {
+            return replaceKeyCommentWithParameterArn(parameter.Value, parameter.ARN);
+        });
 };
