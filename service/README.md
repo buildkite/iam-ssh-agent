@@ -5,9 +5,8 @@ Lambdas, and a DynamoDB table.
 
 ## Deploying
 
-The template can be deployed using the
-[AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-reference.html#serverless-sam-cli)
-or the AWS Serverless Application Repository [TBD].
+The template can be deployed using the AWS Serverless Application Repository or
+the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-reference.html#serverless-sam-cli).
 
 You can choose whether to deploy the service to the same account as your CI
 workload or to a separate account.
@@ -17,6 +16,13 @@ Regional endpoint can be accessed from anywhere (including the public Internet),
 while a Private endpoint can only be accessed from a VPC using a VPC Endpoint.
 Access to a Regional endpoint can be restricted by AWS Account ID, while a
 Private endpoint allows fine-grained restriction by source VPC or VPC Endpoint.
+
+### Deploy from the AWS Serverless Application Repository
+
+Open the [serverless application](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:832577133680:applications~iam-ssh-agent)
+in AWS Console and click Deploy.
+
+Fill in the parameters as described below for a CLI deployment.
 
 ### Deploy using the Serverless Application Model on the command line
 
@@ -50,7 +56,3 @@ endpoint configurations.
 Once the deployment is complete, `sam` will print the URL of the API Gateway and
 the name of the DynamoDB permissions table. You can now add [keys](../README.md#adding-keys)
 and [permissions](../README.md#granting-access-to-keys) to your agent backend.
-
-### Deploy from the AWS Serverless Application Repository
-
-TBD

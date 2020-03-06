@@ -15,10 +15,10 @@ Parameters:
     Description: REGIONAL can be accessed from anywhere including the public Internet (authenticated with IAM credentials), PRIVATE is restricted to specific VPCs using AWS PrivateLink (additional costs apply).
   AccountIds:
     Type: CommaDelimitedList
-    Description: AWS AccountIds whose IAM entities should be allowed to access the API Gateway.
+    Description: Comma separated list of AWS AccountIds whose IAM entities should be allowed to access the API Gateway.
   SourceVpcIds:
     Type: CommaDelimitedList
-    Description: AWS VPC IDs whose occupants should be allowed to access the API Gateway, only applicable when EndpointConfiguration is PRIVATE.
+    Description: Comma separated list of AWS VPC IDs whose occupants should be allowed to access the API Gateway, only applicable when EndpointConfiguration is PRIVATE.
 
 Metadata:
   AWS::CloudFormation::Interface:
