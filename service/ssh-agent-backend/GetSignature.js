@@ -30,12 +30,13 @@ exports.handler = async (event, context) => {
 
         // Find the parameter that stores the private/public key pair for blob
         // searching the list of keys the caller has access to.
-        let keyList = await lib.fetchKeyParameterListForCaller(caller);
-        console.log(`fn=handler caller=${caller} keys=${keyList.join(',')}`);
+        let keyParameterList = await lib.fetchKeyParameterListForCaller(caller);
+        console.log(`fn=handler caller=${caller} keys=${keyParameterList.join(',')}`);
 
-        for (const keyParameter of keyList) {
-            let key = await lib.fetchPublicKeyForParameter(keyParameter);
-            let parsedKey = ssh2.utils.parseKey(key);
+        let parameters = await lib.fetchPublicKeyParameters(keyParameterList);
+
+        for (const parameter of parameters) {
+            let parsedKey = ssh2.utils.parseKey(parameter.Value);
 
             // pubkey is base64(pubkey bits)
             // decoded_pubkey is binary key bits
@@ -43,14 +44,14 @@ exports.handler = async (event, context) => {
             // key is a string rep of the public key with comment etc
             // parsed_key is an OpenSSH key from ssh2-streams
             if (!decodedPubkey.equals(parsedKey.getPublicSSH())) {
-                console.log(`fn=handler caller=${caller} key=${keyParameter} at=skip`);
+                console.log(`fn=handler caller=${caller} key=${parameter.Name} at=skip`);
                 continue;
             }
-            console.log(`fn=handler caller=${caller} key=${keyParameter} at=match`);
+            console.log(`fn=handler caller=${caller} key=${parameter.Name} at=match`);
 
             // Depending on the parameter contents ssh2.utils.parseKey might
             // return a single key or a list of keys. We only support one.
-            let privateKey = [].concat(ssh2.utils.parseKey(await fetchPrivateKeyForParameter(keyParameter)))[0];
+            let privateKey = [].concat(ssh2.utils.parseKey(await fetchPrivateKeyForParameter(parameter.Name)))[0];
 
             var signatureBlob;
             if (privateKey.type == "ssh-rsa") {
@@ -76,7 +77,7 @@ exports.handler = async (event, context) => {
 
             let encodedSignature = Buffer.concat([typeLength, signatureBlob[0], sigLength, signatureBlob[1]]).toString('base64');
 
-            console.log(`fn=handler caller=${caller} key=${keyParameter} signature=${encodedSignature}`);
+            console.log(`fn=handler caller=${caller} key=${parameter.Name} signature=${encodedSignature}`);
 
             return {
                 'statusCode': 200,
