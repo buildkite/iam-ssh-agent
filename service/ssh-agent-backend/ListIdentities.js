@@ -11,10 +11,7 @@ exports.handler = async (event, context) => {
         let keyParameterList = await lib.fetchKeyParameterListForCaller(caller);
         console.log(`fn=handler caller=${caller} keys=${keyParameterList.join(',')}`);
 
-        // TODO do a bulk ssm:GetParameters with batches of 10 keys
-        let keys = await Promise.all(keyParameterList.map(keyParameter => {
-            return lib.fetchPublicKeyForParameter(keyParameter);
-        }));
+        let keys = await lib.fetchPublicKeysForParameters(keyParameterList)
         
         return {
             'statusCode': 200,
