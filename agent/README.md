@@ -2,7 +2,7 @@
 
 The `agent` project is a Rust crate that builds a binary.
 
-The artefacts built from this project are:
+The artifacts built from this project are:
 
 - `iam-ssh-agent.deb` a debian package, attached to the GitHub release
 - `keithduncan/iam-ssh-agent:latest` a Docker image, pushed to Docker hub
