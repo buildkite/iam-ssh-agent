@@ -11,12 +11,12 @@ exports.handler = async (event, context) => {
         let keyParameterList = await lib.fetchKeyParameterListForCaller(caller);
         console.log(`fn=handler caller=${caller} keys=${keyParameterList.join(',')}`);
 
-        let keys = await lib.fetchPublicKeysForParameters(keyParameterList)
+        let keys = await lib.fetchPublicKeyParameters(keyParameterList);
         
         return {
             'statusCode': 200,
             'body': JSON.stringify({
-                identities: keys,
+                identities: keys.map(parameter => parameter.Value),
             })
         }
     } catch (err) {

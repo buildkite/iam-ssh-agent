@@ -38,18 +38,6 @@ function replaceKeyCommentWithParameterArn(key, arn) {
     return components.join(' ');
 }
 
-async function fetchPublicKeyForParameter(keyParameter) {
-    let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
-
-    let response = await ssm.getParameter({
-        Name: `${keyParameter}.pub`,
-    }).promise();
-
-    return replaceKeyCommentWithParameterArn(response.Parameter.Value, response.Parameter.ARN);
-}
-
-exports.fetchPublicKeyForParameter = fetchPublicKeyForParameter;
-
 function chunkArrayInGroups(arr, chunkSize) {
     var groups = [], i;
     for (i = 0; i < arr.length; i += chunkSize) {
@@ -58,7 +46,7 @@ function chunkArrayInGroups(arr, chunkSize) {
     return groups;
 }
 
-exports.fetchPublicKeysForParameters = async (keyParameters) => {
+exports.fetchPublicKeyParameters = async (keyParameters) => {
     let ssm = new AWS.SSM({apiVersion: '2014-11-06'});
 
     // Fetch up to 10 parameters at a time
@@ -72,10 +60,13 @@ exports.fetchPublicKeysForParameters = async (keyParameters) => {
         return response.Parameters;
     }));
 
-    let parameters = responses.flat();
-
-    return parameters
+    return responses
+        .flat()
         .map((parameter) => {
-            return replaceKeyCommentWithParameterArn(parameter.Value, parameter.ARN);
+            return {
+                // Transform the public key paramter name back to the private key parameter name
+                Name: parameter.Name.slice(0, -4),
+                Value: replaceKeyCommentWithParameterArn(parameter.Value, parameter.ARN),
+            }
         });
 };
