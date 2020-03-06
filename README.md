@@ -71,12 +71,6 @@ GetSignature lambda has access to both.
 You can use any hierarchy to store your public and private keys in SSM so long
 as the parameter paths end in `key.pub` and `key` respectively.
 
-The GetSignature lambda IAM role includes a policy that permits `kms:Decrypt`
-using the `aws/ssm` KMS key. You can store your ssh private keys in a
-`SecureString` parameter encrypted with that key to prevent unintended access to
-the raw key material. Deploying this service to a unique AWS account also
-helps limit access to the key material.
-
 Example key hierarchies:
 
 ```
@@ -93,7 +87,36 @@ Example key hierarchies:
 /gitlab.company.com/global/name/key
 ```
 
-[CLI parameter add example]
+The GetSignature lambda IAM role includes a policy that permits `kms:Decrypt`
+using the `aws/ssm` KMS key. You can store your ssh private keys in a
+`SecureString` parameter encrypted with that key to prevent unintended access to
+the raw key material. Deploying this service to a unique AWS account also
+helps limit access to the key material.
+
+To generate and store an ssh key pair in the Parameter Store:
+
+```
+# Don't enter a passphrase, the private key will be encrypted using a KMS key
+$ ssh-keygen -f test-key
+
+# Store the keys in Parameter Store
+$ aws ssm put-parameter \
+  --name /github/username/repository/key.pub \
+  --type String \
+  --value "$(<test-key.pub)"
+$ aws ssm put-parameter \
+  --name /github/username/repository/key \
+  --type SecureString \
+  --value "$(<test-key)"
+$ aws ssm get-parameter \
+  --name /github/username/repository/key \
+  --output text \
+  --query 'Parameter.ARN'
+```
+
+Add the public key to the service you want to access, then delete the key files
+from your file system. When adding the public key to a service, give the key a
+descriptive name like the Parameter ARN printed by the last command.
 
 ### Granting Access to Keys
 
