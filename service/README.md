@@ -1,7 +1,51 @@
 # iam-ssh-agent service
 
-The `service` project is an AWS SAM project that deploys an API Gateway, lambdas
-and a DynamoDB table.
+The `service` project is an AWS SAM template that deploys an API Gateway,
+Lambdas and a DynamoDB table.
 
-The template can be deployed using the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+## Deploying
+
+The template can be deployed using the
+[AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-reference.html#serverless-sam-cli)
 or the AWS Serverless Application Repository [TBD].
+
+You can choose whether to deploy the service to the same account as your CI
+workload or a separate account.
+
+You can also choose whether to create a Regional or Private endpoint. Access to
+a Regional endpoint can be restricted by AWS Account ID, while a Private
+endpoint allows fine grained restriction by source VPC or VPC Endpoint.
+
+### Deploy using the Serverless Application Model on the command line
+
+The AWS SAM CLI is an extension of the AWS CLI that adds functionality for
+building and testing Lambda applications.
+
+[Install the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html). These instructions were written using SAM
+Version 0.43.0.
+
+To deploy `iam-ssh-agent` for the first time, authenticate with AWS and run the
+following command from the `service` directory:
+
+```
+sam deploy --guided
+```
+
+You will be prompted for the following parameter values:
+
+* **Stack Name**: AWS will create a CloudFormation Stack using this name, use
+something like `iam-ssh-agent`.
+* **AWS Region**: The AWS region you want to deploy this instance of
+`iam-ssh-agent`.
+* **Parameter Endpoint Configuration**: Select REGIONAL or PRIVATE, 
+* **Parameter AccountIds**: Limit access based on the account of calling IAM
+entities, this is recommended for REGIONAL endpoint configurations. This is a
+comma separated list of AWS Account IDs.
+* **Parameter SourceVpcIds**: Limit access based on the source VPC or VPC
+Endpoint of calling IAM entities, this is only available for PRIVATE endpoint
+configurations.
+
+Once the deployment is complete `sam` will print the URL of the API Gateway and
+the DynamoDB table name that stores permissions. You can now add
+[keys](../README.md#adding-keys) and [permissions](../README.md#granting-access-to-keys)
+to your agent backend.

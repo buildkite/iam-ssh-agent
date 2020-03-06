@@ -3,7 +3,11 @@
 A replacement ssh-agent that uses the caller's IAM identity to access a list of
 permitted ssh identities.
 
-iam-ssh-agent is split into two components; a serverless API that uses API
+`iam-ssh-agent` is designed to be used in less trusted continuous integration
+environments where you want to use an ssh key to clone source control
+repositories without granting access to the raw key material.
+
+`iam-ssh-agent` is split into two components; a serverless API that uses API
 Gateway and Lambda functions to list keys and sign data, and a binary that binds
 a unix domain socket with the ssh-agent protocol.
 
@@ -11,18 +15,22 @@ a unix domain socket with the ssh-agent protocol.
 binary.
 - [`/service`](service) an AWS SAM project that deploys the serverless
 backend for the `iam-ssh-agent` binary.
+
+Once you have successfully deployed the service you can
+[add keys](#adding-keys), [grant](#granting-access-to-keys), and
+[test](#testing-access) access.
+
+For development and testing:
+
 - [`/client`](client) a node package used for testing the ssh-agent
-implementation
+implementation and comparing output to other ssh-agent implementations.
 
 ## Agent
 
-`iam-ssh-agent` is designed to be used in less trusted continuous integration
-environments where you want to use an ssh key to clone source control
-repositories without granting access to the raw key material.
-
 The agent binary should be a near drop in replacement for existing uses of
 ssh-agent, or provide a pathway for you to remove private key material from
-continuous integration hosts.
+continuous integration hosts. It should be installed in the same place you
+currently use `ssh`.
 
 The agent requires an `IAM_SSH_AGENT_BACKEND_URL` environment variable to be set
 to the URL of the API Gateway stage it should connect to. This URL will be
@@ -35,24 +43,26 @@ the API Gateway will be signed with these credentials and the service will
 provide access to keys listed in the DynamoDB Permissions table for the caller's
 IAM entity.
 
+The agent can be installed from the Debian packages attached to the
+[GitHub releases](https://github.com/keithduncan/iam-ssh-agent/releases) or
+using `cargo` to build the binary yourself. It is also published to Docker hub
+as [keithduncan/iam-ssh-agent](https://hub.docker.com/r/keithduncan/iam-ssh-agent).
+
 ## Service
 
-You can choose whether to deploy the service to the same account as your CI
-workload or a separate account. You can also choose whether to create a Regional
-or Private endpoint. Access to a Regional endpoint can be restricted by
-AWS Account ID, while a Private endpoint allows fine grained restriction by
-source VPC or VPC Endpoint.
+An API Gateway is configured to forward requests to two lambdas, ListIdentities
+and GetSignature. The `iam-ssh-agent` never sees the raw key material, it can
+only ask for a list of available keys and a signature for a given key.
 
 Keys are stored in AWS Systems Manager Parameter Store where the private keys
-can be encrypted with a KMS key.
+can be encrypted with a KMS key. Key permissions are stored in a DynamoDB table
+keyed by IAM Entity Unique ID.
 
-Key permissions are stored in a DynamoDB table keyed by IAM Entity Unique ID.
+An IAM Entity can only request signatures for keys it has been granted access
+to.
 
-Deploy the service to an account using the `sam` command line tool or AWS
-Serverless Application Repository [TBD].
-
-Once you have successfully deployed the service you can [add keys](#adding-keys),
-[grant access](#granting-access-to-keys), and [test access](#testing-access).
+See the [deploying guide](service/README.md#deploying) for instructions on how
+to deploy the service to your AWS Account.
 
 ### Adding Keys
 
@@ -137,8 +147,8 @@ See [IAM Identifiers Unique ID](https://docs.aws.amazon.com/IAM/latest/UserGuide
 for more details on IAM Unique IDs.
 
 Once you have the Unique ID for the entity you want to grant access to, you can
-create an item in the DynamoDB permissions table. You can add an item using the
-AWS CLI or Console.
+add a permission to the DynamoDB permissions table. You can add an item using
+the AWS Console or CLI:
 
 ```
 aws dynamodb update-item \
@@ -224,17 +234,17 @@ I use this project to provide my [Buildkite](https://buildkite.com) agents
 [running on ECS](https://github.com/keithduncan/buildkite-on-demand) access to
 ssh keys to clone source code repositories.
 
-To use the `iam-ssh-agent` service in ECS Tasks I add a sidecar container which
-uses the [keithduncan/iam-ssh-agent](https://hub.docker.com/repository/docker/keithduncan/iam-ssh-agent)
-docker image to my task definitions. The task definition also uses a bind mount
-volume to expose the unix domain socket bound by `iam-ssh-agent` to the Buildkite
-agent container which invokes `ssh`.
+To use the `iam-ssh-agent` service in ECS Tasks, I add a
+[keithduncan/iam-ssh-agent](https://hub.docker.com/r/keithduncan/iam-ssh-agent)
+sidecar container to my task definitions. The task definition uses a bind
+mount volume to expose the unix domain socket bound by `iam-ssh-agent` to the
+Buildkite agent container which invokes `ssh`.
 
 To ensure the `iam-ssh-agent` container has booted, the main container uses a
 container dependency `DependsOn: [{"Condition": "HEALTHY", "ContainerName": "ssh-agent"}]`
 condition to wait for the ssh-agent to boot and become healthy before starting,
-and the sidecar container defines a healthcheck which uses busybox to verify the
-socket has been bound.
+and the sidecar container defines a healthcheck which uses
+[busybox](https://www.busybox.net) to verify the socket has been bound.
 
 An example task definition which prints which keys the container has access
 to, based on the task IAM role passed when scheduling the ECS task, is shown
