@@ -115,9 +115,11 @@ $ aws ssm get-parameter \
   --query 'Parameter.ARN'
 ```
 
-Add the public key to the service you want to access, then delete the key files
-from your file system. When adding the public key to a service, give the key a
-descriptive name like the Parameter ARN printed by the last command.
+Once you have added both keys to the Parameter Store, and submitted
+the public key to the service you want to access, delete the key
+files from your file system. When adding public keys to a service,
+give the key a descriptive name like the Parameter ARN printed by
+the last command.
 
 ### Granting Access to Keys
 
