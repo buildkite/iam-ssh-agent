@@ -192,7 +192,7 @@ _authenticate_ successfully but may fail _authorization_ when attempting to
 clone a repository if the key doesn't have access.
 
 Instead of using multiple keys, consider using a GitHub machine user or a GitLab
-Global Deploy key which have a single key but access to multiple repositories.
+Global Deploy key which allow a single key to access multiple repositories.
 
 ### Granting Access to the API Gateway
 
