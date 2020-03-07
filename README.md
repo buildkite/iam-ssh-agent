@@ -256,7 +256,9 @@ for more tips on troubleshooting access to Private API Gateways.
 
 I use this project to provide my [Buildkite](https://buildkite.com) agents
 [running on ECS](https://github.com/keithduncan/buildkite-on-demand) access to
-ssh keys for cloning private source code repositories.
+ssh keys for cloning private source code repositories. The same pattern is
+also applicable to init system managed virtual machines on EC2, or
+Kubernetes pods on EKS.
 
 To use the `iam-ssh-agent` service in ECS Tasks, I add a
 [keithduncan/iam-ssh-agent](https://hub.docker.com/r/keithduncan/iam-ssh-agent)
