@@ -16,7 +16,7 @@ binary.
 - [`/service`](service) an AWS SAM project that deploys the serverless
 backend for the `iam-ssh-agent` binary.
 
-For deployment instructions see the `service` [README](service/README.md#deploying).
+For deployment instructions see the [`service` README](service/README.md#deploying).
 Once you have successfully deployed the service you can
 [add keys](#adding-keys), [grant](#granting-access-to-keys), and
 [test](#testing-access) access.
@@ -60,7 +60,7 @@ can be encrypted with a KMS key. Key permissions are stored in a DynamoDB table
 keyed by [IAM Entity Unique ID](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-unique-ids).
 
 See the [deploying guide](service/README.md#deploying) for instructions on how
-to deploy the service to your AWS Account.
+to deploy the service in your AWS Organization.
 
 ### Adding Keys
 
