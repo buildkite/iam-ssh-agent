@@ -16,7 +16,7 @@ binary.
 - [`/service`](service) an AWS SAM project that deploys the serverless
 backend for the `iam-ssh-agent` binary.
 
-For deployment instructions see the `service` [README](service/README.md#deploying).
+For deployment instructions see the [`service` README](service/README.md#deploying).
 Once you have successfully deployed the service you can
 [add keys](#adding-keys), [grant](#granting-access-to-keys), and
 [test](#testing-access) access.
@@ -60,7 +60,7 @@ can be encrypted with a KMS key. Key permissions are stored in a DynamoDB table
 keyed by [IAM Entity Unique ID](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-unique-ids).
 
 See the [deploying guide](service/README.md#deploying) for instructions on how
-to deploy the service to your AWS Account.
+to deploy the service in your AWS Organization.
 
 ### Adding Keys
 
@@ -115,9 +115,11 @@ $ aws ssm get-parameter \
   --query 'Parameter.ARN'
 ```
 
-Add the public key to the service you want to access, then delete the key files
-from your file system. When adding the public key to a service, give the key a
-descriptive name like the Parameter ARN printed by the last command.
+Once you have added both keys to the Parameter Store, and submitted
+the public key to the service you want to access, delete the key
+files from your file system. When adding public keys to a service,
+give the key a descriptive name like the Parameter ARN printed by
+the last command.
 
 ### Granting Access to Keys
 
@@ -190,7 +192,7 @@ _authenticate_ successfully but may fail _authorization_ when attempting to
 clone a repository if the key doesn't have access.
 
 Instead of using multiple keys, consider using a GitHub machine user or a GitLab
-Global Deploy key which have a single key but access to multiple repositories.
+Global Deploy key which allow a single key to access multiple repositories.
 
 ### Granting Access to the API Gateway
 
@@ -254,7 +256,9 @@ for more tips on troubleshooting access to Private API Gateways.
 
 I use this project to provide my [Buildkite](https://buildkite.com) agents
 [running on ECS](https://github.com/keithduncan/buildkite-on-demand) access to
-ssh keys for cloning private source code repositories.
+ssh keys for cloning private source code repositories. The same pattern is
+also applicable to init system managed virtual machines on EC2, or
+Kubernetes pods on EKS.
 
 To use the `iam-ssh-agent` service in ECS Tasks, I add a
 [keithduncan/iam-ssh-agent](https://hub.docker.com/r/keithduncan/iam-ssh-agent)
