@@ -16,6 +16,7 @@ binary.
 - [`/service`](service) an AWS SAM project that deploys the serverless
 backend for the `iam-ssh-agent` binary.
 
+For deployment instructions see the `service` [README](service/README.md#deploying).
 Once you have successfully deployed the service you can
 [add keys](#adding-keys), [grant](#granting-access-to-keys), and
 [test](#testing-access) access.
