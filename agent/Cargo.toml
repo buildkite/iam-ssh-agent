@@ -1,6 +1,6 @@
 [package]
 name = "iam-ssh-agent"
-description = "ssh-agent compatable daemon that uses a serverless backend for list and sign operations."
+description = "ssh-agent compatible daemon that uses a serverless backend for list and sign operations."
 version = "0.2.0"
 authors = ["Keith Duncan <keith_duncan@me.com>"]
 edition = "2018"
