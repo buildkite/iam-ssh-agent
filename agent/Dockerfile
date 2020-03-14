@@ -15,4 +15,4 @@ FROM alpine:3.11
 
 RUN apk add --no-cache ca-certificates
 
-COPY --from=BUILD target/x86_64-unknown-linux-musl/release/iam-ssh-agent bin/
+COPY --from=BUILD /workspace/target/x86_64-unknown-linux-musl/release/iam-ssh-agent bin/
