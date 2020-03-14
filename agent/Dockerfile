@@ -1,14 +1,18 @@
-FROM debian:buster-slim
+FROM rust:1.41 AS BUILD
+
+RUN rustup target add x86_64-unknown-linux-musl
 
 RUN apt-get update && \
     apt-get install -y \
-      busybox \
-      ca-certificates \
-      curl && \
-    rm -rf /var/lib/apt/lists/*
+      musl-tools
 
-ARG IAM_SSH_AGENT_VERSION
-RUN cd /tmp && \
-    curl --location "https://github.com/keithduncan/iam-ssh-agent/releases/download/v${IAM_SSH_AGENT_VERSION}/iam-ssh-agent_${IAM_SSH_AGENT_VERSION}_amd64.deb" >iam.deb && \
-    dpkg -i iam.deb && \
-    rm iam.deb
+COPY ["src/", "/workspace/src"]
+COPY ["Cargo.toml", "Cargo.lock", "/workspace/"]
+WORKDIR /workspace
+RUN cargo build --release --target x86_64-unknown-linux-musl
+
+FROM alpine:3.11
+
+RUN apk add --no-cache ca-certificates
+
+COPY --from=BUILD /workspace/target/x86_64-unknown-linux-musl/release/iam-ssh-agent bin/
