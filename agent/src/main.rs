@@ -8,10 +8,10 @@ mod agent;
 fn main() {
 	let _ = env_logger::try_init();
 
-    let matches = App::new("iam-ssh-agent")
-		.version("0.1.0")
-		.author("Keith Duncan <keith_duncan@me.com>")
-		.about("Forward ssh list and sign operations to an iam-ssh-agent backend, receive access to keys based on your IAM identity.")
+    let matches = App::new(env!("CARGO_PKG_NAME"))
+		.version(env!("CARGO_PKG_VERSION"))
+		.author(env!("CARGO_PKG_AUTHORS"))
+		.about(env!("CARGO_PKG_DESCRIPTION"))
 		.subcommand(SubCommand::with_name("list-keys")
 			.about("List all keys for the caller's IAM identity."))
 		.subcommand(SubCommand::with_name("daemon")
