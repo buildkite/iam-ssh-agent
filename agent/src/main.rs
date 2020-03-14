@@ -8,10 +8,13 @@ mod agent;
 fn main() {
 	let _ = env_logger::try_init();
 
+	let about = env!("CARGO_PKG_DESCRIPTION").to_owned() + "\n\nAll commands require the IAM_SSH_AGENT_BACKEND_URL environment variable to be set e.g. https://${ApiId}.execute-api.${Region}.amazonaws.com/${Stage}";
+	let about = textwrap::fill(&about, 80);
+
     let matches = App::new(env!("CARGO_PKG_NAME"))
 		.version(env!("CARGO_PKG_VERSION"))
 		.author(env!("CARGO_PKG_AUTHORS"))
-		.about(env!("CARGO_PKG_DESCRIPTION"))
+		.about(about.as_str())
 		.subcommand(SubCommand::with_name("list-keys")
 			.about("List all keys for the caller's IAM identity."))
 		.subcommand(SubCommand::with_name("daemon")
