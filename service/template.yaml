@@ -36,6 +36,17 @@ Metadata:
       EndpointConfiguration:
         default: What kind of API Gateway do you want to create?
 
+  AWS::ServerlessRepo::Application:
+    Name: iam-ssh-agent
+    Description: An ssh-agent replacement that uses a caller's IAM identity to control access a list of permitted ssh identities. Designed for less trusted continuous integration environments where you want to use an ssh key without granting access to the raw key material.
+    Author: Keith Duncan
+    SpdxLicenseId: BSD-3-Clause
+    LicenseUrl: ../LICENSE
+    ReadmeUrl: README_SAR.md
+    Labels: ['ssh', 'ssh-agent', 'ssh-keys', 'authentication']
+    HomePageUrl: https://github.com/keithduncan/iam-ssh-agent
+    SourceCodeUrl: https://github.com/keithduncan/iam-ssh-agent
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
