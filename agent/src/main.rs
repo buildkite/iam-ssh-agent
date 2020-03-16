@@ -8,6 +8,11 @@ mod agent;
 fn main() {
 	let _ = env_logger::try_init();
 
+	unsafe {
+		signal_hook::register(signal_hook::SIGTERM, || std::process::exit(0)).expect("register SIGTERM handler");
+		signal_hook::register(signal_hook::SIGINT, || std::process::abort()).expect("register SIGINT handler");
+	}
+
 	let about = env!("CARGO_PKG_DESCRIPTION").to_owned() + "\n\nAll commands require the IAM_SSH_AGENT_BACKEND_URL environment variable to be set e.g. https://${ApiId}.execute-api.${Region}.amazonaws.com/${Stage}";
 	let about = textwrap::fill(&about, 80);
 
