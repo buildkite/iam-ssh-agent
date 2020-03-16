@@ -51,11 +51,11 @@ fn main() {
 
         if fs::metadata(&pipe).is_ok() {
             if let Ok(_) = fs::remove_file(&pipe){
-                println!("pipe deleted");
+                println!("pipe={} at=deleted", pipe.display());
             }
         }
 
-        eprintln!("binding to {}", pipe.display());
+        eprintln!("pipe={} at=bind", pipe.display());
 
         let _ = agent.run_unix(&pipe);
 		return;
