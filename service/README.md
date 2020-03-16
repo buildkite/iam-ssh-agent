@@ -19,10 +19,10 @@ Private endpoint allows fine-grained restriction by source VPC or VPC Endpoint.
 
 ### Deploy from the AWS Serverless Application Repository
 
-Open the [serverless application](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:832577133680:applications~iam-ssh-agent)
-in AWS Console and click Deploy.
+[![Deploy AWS Serverless Application](https://cdn.rawgit.com/buildkite/cloudformation-launch-stack-button-svg/master/launch-stack.svg)](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:832577133680:applications~iam-ssh-agent)
 
-Fill in the parameters as described below for a CLI deployment.
+Open the application in AWS Console and click Deploy, fill in the parameters
+as described below for a CLI deployment.
 
 ### Deploy using the Serverless Application Model on the command line
 
