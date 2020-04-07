@@ -7,7 +7,7 @@ edition = "2018"
 repository = "https://github.com/keithduncan/iam-ssh-agent"
 license = "MIT"
 keywords = [ "ssh", "ssh-agent", "aws" ]
-categories = [ "development-tools" ]
+categories = [ "command-line-utilities", "development-tools" ]
 include = ["/src"]
 readme = "README.md"
 
