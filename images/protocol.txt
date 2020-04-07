@@ -1,0 +1,28 @@
+# https://sequencediagram.org
+
+title git clone with iam-ssh-agent
+
+git+ssh clone->(1)github.com:connect
+git+ssh clone(1)<-github.com:publickey auth
+git+ssh clone->(1)iam-ssh-agent binary: list-identities
+note over iam-ssh-agent binary,iam-ssh-agent backend:Requests signed with AWS IAM Credentials
+iam-ssh-agent binary->(1)iam-ssh-agent backend: list-identities
+#iam-ssh-agent backend->(1)DynamoDB: get ssh identities for caller
+#iam-ssh-agent backend(1)<-DynamoDB: identities
+#iam-ssh-agent backend->(1)AWS SSM Parameter Store: get public key parameters
+#iam-ssh-agent backend(1)<-AWS SSM Parameter Store: public key parameters
+iam-ssh-agent binary(1)<-iam-ssh-agent backend: public keys
+git+ssh clone(1)<-iam-ssh-agent binary: public keys
+git+ssh clone->(1)github.com: try public key
+git+ssh clone(1)<-github.com: public key accepted, sign this data
+git+ssh clone->(1)iam-ssh-agent binary: sign-data for public key
+iam-ssh-agent binary->(1)iam-ssh-agent backend: sign-data for public key
+#iam-ssh-agent backend->(1)DynamoDB: get ssh identities for caller
+#iam-ssh-agent backend(1)<-DynamoDB: identities
+#iam-ssh-agent backend->(1)AWS SSM Parameter Store: get + decrypt private key parameter for public key
+#iam-ssh-agent backend(1)<-AWS SSM Parameter Store: private key
+note right of iam-ssh-agent backend: ssh private key doesn't\nleave the service
+iam-ssh-agent binary(1)<-iam-ssh-agent backend: signature
+git+ssh clone(1)<-iam-ssh-agent binary: signature
+git+ssh clone->(1)github.com: signature
+git+ssh clone(1)<-github.com: authenticated
