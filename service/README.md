@@ -17,7 +17,7 @@ while a Private endpoint can only be accessed from a VPC using a VPC Endpoint.
 Access to a Regional endpoint can be restricted by AWS Account ID, while a
 Private endpoint allows fine-grained restriction by source VPC or VPC Endpoint.
 
-### Deploy from the AWS Serverless Application Repository
+### Deploy from the AWS Serverless Application Repository web console
 
 [![Deploy AWS Serverless Application](https://cdn.rawgit.com/buildkite/cloudformation-launch-stack-button-svg/master/launch-stack.svg)](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:832577133680:applications~iam-ssh-agent)
 
@@ -35,8 +35,8 @@ instructions were written using SAM Version 0.43.0.
 To deploy `iam-ssh-agent` for the first time, authenticate with AWS and run the
 following command from the `service` directory:
 
-```
-sam deploy --guided
+```bash
+iam-ssh-agent$ sam deploy --guided
 ```
 
 You will be prompted for the following parameter values:
