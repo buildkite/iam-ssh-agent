@@ -5,7 +5,7 @@ permitted ssh identities.
 
 `iam-ssh-agent` is designed to be used in less trusted continuous integration
 environments where you want to use an ssh key to clone source control
-repositories without granting access to the raw key material.
+repositories without providing the raw key material.
 
 `iam-ssh-agent` is split into two components: a binary that binds a unix domain
 socket with the ssh-agent protocol, and a serverless API that uses API Gateway
@@ -25,6 +25,16 @@ For development and testing:
 
 - [`/client`](client) a node package used for testing the ssh-agent
 implementation and comparing output to other ssh-agent implementations.
+
+## Protocol
+
+By storing the ssh private keys behind a service boundary, and providing an
+authenticated, access controlled signing service, client environments can
+authenticate without access to the ssh private keys.
+
+![](images/protocol.png)
+
+_Generated using https://sequencediagram.org/_
 
 ## Agent
 
