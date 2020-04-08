@@ -2,6 +2,7 @@ use ssh_agent::{agent::Agent, proto::{Message, Identity, SignRequest, SignatureB
 use rusoto_core::{region::Region, RusotoError, Client, signature::SignedRequest};
 use url::Url;
 use openssh_keys::PublicKey;
+use std::str::FromStr;
 
 mod service;
 
@@ -23,8 +24,27 @@ impl Backend {
 		}
 	}
 
+	fn region(&self) -> Region {
+		/*
+			Endpoint specific public DNS hostname
+			{public-dns-hostname}.execute-api.{region}.vpce.amazonaws.com
+
+			Route 53 alias
+			{rest-api-id}-{vpce-id}.execute-api.{region}.amazonaws.com
+
+			Private DNS Name
+			{restapi-id}.execute-api.{region}.amazonaws.com
+		*/
+		let domain = self.url.domain().expect("backend URL must be a domain");
+
+		let domain_labels = domain.split(".").collect::<Vec<_>>();
+		let region_label = domain_labels.get(2).expect("at least three domain labels");
+
+		Region::from_str(region_label).expect("domain label is a valid region")
+	}
+
 	pub fn fetch_identities(&self) -> Result<service::ListIdentities, RusotoError<service::ListIdentitiesError>> {
-		let region = Region::default();
+		let region = self.region();
 
 		let mut request = SignedRequest::new("GET", "execute-api", &region, &format!("{}/{}", self.url.path(), "identities"));
 		request.set_hostname(Some(self.url.host_str().expect("url host").to_owned()));
@@ -58,7 +78,7 @@ impl Backend {
 		let bytes = serde_json::to_vec(&request)
 			.map_err(|e| RusotoError::ParseError(format!("{:?}", e)))?;
 
-		let region = Region::default();
+		let region = self.region();
 
 		let mut request = SignedRequest::new("POST", "execute-api", &region, &format!("{}/{}", self.url.path(), "signature"));
 		request.set_hostname(Some(self.url.host_str().expect("url host").to_owned()));

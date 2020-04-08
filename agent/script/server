@@ -2,4 +2,4 @@
 
 source .env
 
-exec docker run --rm --volume ssh-socket:/ssh --env RUST_LOG=rusoto=debug,hyper=debug --env IAM_SSH_AGENT_BACKEND_URL --env AWS_DEFAULT_REGION --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env AWS_SESSION_TOKEN iam-ssh-agent:latest /bin/iam-ssh-agent daemon --bind-to=/ssh/socket
+exec docker run --rm --volume ssh-socket:/ssh --env RUST_LOG=rusoto=debug,hyper=debug --env IAM_SSH_AGENT_BACKEND_URL --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env AWS_SESSION_TOKEN iam-ssh-agent:latest /bin/iam-ssh-agent daemon --bind-to=/ssh/socket
