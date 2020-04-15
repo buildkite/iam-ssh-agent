@@ -1,7 +1,6 @@
 tmp
 
 target
-!target/debian
 
 .env
 
