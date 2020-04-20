@@ -26,3 +26,9 @@ openssh-keys = "0.4.1"
 base64 = "0.11.0"
 env_logger = "0.7.1"
 signal-hook = "0.1.13"
+
+[package.metadata.rpm.cargo]
+buildflags = ["--release"]
+
+[package.metadata.rpm.targets]
+iam-ssh-agent = { path = "/usr/bin/iam-ssh-agent" }
