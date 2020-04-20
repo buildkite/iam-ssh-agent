@@ -19,6 +19,7 @@ Parameters:
   SourceVpcIds:
     Type: CommaDelimitedList
     Description: Comma separated list of AWS VPC IDs whose occupants should be allowed to access the API Gateway, only applicable when EndpointConfiguration is PRIVATE.
+    Default: ''
 
 Metadata:
   AWS::CloudFormation::Interface:
