@@ -45,6 +45,8 @@ fn main() {
 	if let Some(matches) = matches.subcommand_matches("daemon") {
 		// TODO support exec mode and export SSH_AUTH_SOCK
 
+		// Support command line for testing and an environment variable for
+		// systemd units.
 		let pipe: String = matches.value_of("bind-to").map(str::to_string).or(env::var("SSH_AUTH_SOCK").ok()).expect("bind-to is required");
         let pipe = Path::new(&pipe);
 
