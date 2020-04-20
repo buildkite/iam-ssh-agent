@@ -23,7 +23,7 @@ fn main() {
 		.subcommand(SubCommand::with_name("list-keys")
 			.about("List all keys for the caller's IAM identity."))
 		.subcommand(SubCommand::with_name("daemon")
-			.about("Run the daemon, bind a UNIX domain socket to provide ssh list and sign operations.")
+			.about("Run the daemon, bind a UNIX domain socket to provide ssh list and sign operations. Defaults to SSH_AUTH_SOCK if unspecified.")
 			.arg(Arg::with_name("bind-to")
 				.long("bind-to")
 				.short("b")
