@@ -47,8 +47,8 @@ fn main() {
 
         // Support command line for testing and an environment variable for
         // systemd units.
-        let pipe: String = matches.value_of("bind-to").map(str::to_string).or(env::var("SSH_AUTH_SOCK").ok()).expect("bind-to is required");
-        let pipe = Path::new(&pipe);
+        let pipe = matches.value_of("bind-to").expect("bind-to is required");
+        let pipe = Path::new(pipe);
 
         if fs::metadata(&pipe).is_ok() {
             if let Ok(_) = fs::remove_file(&pipe) {
