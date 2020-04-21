@@ -22,8 +22,8 @@ Parameters:
     Default: ''
 
 Conditions:
-  AccountRestriction: !Not [ !Equal [ !Join [ ',', !Ref AccountIds ] , '' ] ]
-  VpcRestriction: !Not [ !Equal [ !Join [ ',', !Ref SourceVpcIds ] , '' ] ]
+  AccountRestriction: !Not [ !Equals [ !Join [ ',', !Ref AccountIds ] , '' ] ]
+  VpcRestriction: !Not [ !Equals [ !Join [ ',', !Ref SourceVpcIds ] , '' ] ]
 
 Metadata:
   AWS::CloudFormation::Interface:
