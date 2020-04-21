@@ -18,8 +18,12 @@ Parameters:
     Description: Comma separated list of AWS AccountIds whose IAM entities should be allowed to access the API Gateway.
   SourceVpcIds:
     Type: CommaDelimitedList
-    Description: Comma separated list of AWS VPC IDs whose occupants should be allowed to access the API Gateway, only applicable when EndpointConfiguration is PRIVATE.
+    Description: Optional - Comma separated list of AWS VPC IDs whose occupants should be allowed to access the API Gateway, only applicable when EndpointConfiguration is PRIVATE.
     Default: ''
+
+Conditions:
+  AccountRestriction: !Not [ !Equal [ !Join [ ',', !Ref AccountIds ] , '' ] ]
+  VpcRestriction: !Not [ !Equal [ !Join [ ',', !Ref SourceVpcIds ] , '' ] ]
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -61,8 +65,8 @@ Globals:
       DefaultAuthorizer: AWS_IAM
       InvokeRole: NONE
       ResourcePolicy:
-        AwsAccountWhitelist: !Ref AccountIds
-        SourceVpcWhitelist: !Ref SourceVpcIds
+        AwsAccountWhitelist: !If [ AccountRestriction, !Ref AccountIds, !Ref AWS::NoValue ]
+        SourceVpcWhitelist: !If [ VpcRestriction, !Ref SourceVpcIds, !Ref AWS::NoValue ]
     EndpointConfiguration: !Ref EndpointConfiguration
 
 Resources:
