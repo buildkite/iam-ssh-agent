@@ -51,15 +51,21 @@ fn main() {
         let pipe = Path::new(&pipe);
 
         if fs::metadata(&pipe).is_ok() {
-            if let Ok(_) = fs::remove_file(&pipe){
-                println!("pipe={} at=deleted", pipe.display());
+            if let Ok(_) = fs::remove_file(&pipe) {
+                println!("fn=main pipe={} at=deleted", pipe.display());
             }
         }
 
-        eprintln!("pipe={} at=bind", pipe.display());
+        eprintln!("fn=main pipe={} at=bind", pipe.display());
 
-        let _ = agent.run_unix(&pipe);
-        return;
+        match agent.run_unix(&pipe) {
+            Err(e) => eprintln!("fn=main pipe={} at=bind err={:?}", pipe.display(), e),
+            Ok(_) => {},
+        }
+
+        eprintln!("fn=main pipe={} at=finished", pipe.display());
+
+        std::process::exit(1);
     }
 
     unreachable!()
