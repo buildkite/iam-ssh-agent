@@ -11,5 +11,5 @@ repositories without granting access to the raw key material.
 socket with the ssh-agent protocol, and a serverless API that uses API Gateway
 and Lambda functions to answer `list keys` and `sign data` requests.
 
-See the [GitHub repository](https://github.com/keithduncan/iam-ssh-agent) for
+See the [GitHub repository](https://github.com/buildkite/iam-ssh-agent) for
 more documentation.

@@ -1,6 +1,6 @@
 # iam-ssh-agent agent
 
-Binary replacement for `ssh-agent` that uses an [iam-ssh-agent](https://github.com/keithduncan/iam-ssh-agent)
+Binary replacement for `ssh-agent` that uses an [iam-ssh-agent](https://github.com/buildkite/iam-ssh-agent)
 backend for `list keys` and `sign data` operations.
 
 The artifacts built from this crate are:

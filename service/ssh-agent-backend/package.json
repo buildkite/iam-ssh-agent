@@ -2,7 +2,7 @@
   "name": "ssh-agent-backend",
   "version": "0.1.0",
   "description": "iam-ssh-agent backend lambda functions",
-  "repository": "https://github.com/keithduncan/iam-ssh-agent",
+  "repository": "https://github.com/buildkite/iam-ssh-agent",
   "author": "Keith Duncan",
   "license": "MIT",
   "dependencies": {
