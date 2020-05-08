@@ -54,7 +54,7 @@ provide access to keys listed in the DynamoDB Permissions table for the caller's
 IAM entity.
 
 The agent can be installed from the Debian packages attached to the
-[GitHub releases](https://github.com/keithduncan/iam-ssh-agent/releases) or
+[GitHub releases](https://github.com/buildkite/iam-ssh-agent/releases) or
 using `cargo` to build the binary yourself. It is also published to Docker hub
 as [keithduncan/iam-ssh-agent](https://hub.docker.com/r/keithduncan/iam-ssh-agent).
 
@@ -264,9 +264,9 @@ for more tips on troubleshooting access to Private API Gateways.
 
 ## Testing Access
 
-I use this project to provide my [Buildkite](https://buildkite.com) agents
-[running on ECS](https://github.com/keithduncan/buildkite-on-demand) access to
-ssh keys for cloning private source code repositories. The same pattern is
+This project can be used to grant [Buildkite](https://buildkite.com) agents
+[running on ECS](https://github.com/buildkite/on-demand) permission to use
+ssh private keys to clone private source code repositories. The same pattern is
 also applicable to init system managed virtual machines on EC2, or
 Kubernetes pods on EKS.
 
@@ -380,5 +380,5 @@ ProjectRole:
 ```
 
 For more details on running Buildkite agents on-demand with ECS see my
-[agent-scheduler](https://github.com/keithduncan/buildkite-on-demand/tree/master/agent-scheduler)
+[agent-scheduler](https://github.com/buildkite/on-demand/tree/master/agent-scheduler)
 project.

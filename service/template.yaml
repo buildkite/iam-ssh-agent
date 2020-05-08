@@ -49,8 +49,8 @@ Metadata:
     LicenseUrl: ../LICENSE
     ReadmeUrl: README_SAR.md
     Labels: ['ssh', 'ssh-agent', 'ssh-keys', 'authentication']
-    HomePageUrl: https://github.com/keithduncan/iam-ssh-agent
-    SourceCodeUrl: https://github.com/keithduncan/iam-ssh-agent
+    HomePageUrl: https://github.com/buildkite/iam-ssh-agent
+    SourceCodeUrl: https://github.com/buildkite/iam-ssh-agent
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
