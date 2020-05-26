@@ -56,7 +56,7 @@ IAM entity.
 The agent can be installed from the Debian packages attached to the
 [GitHub releases](https://github.com/buildkite/iam-ssh-agent/releases) or
 using `cargo` to build the binary yourself. It is also published to Docker hub
-as [keithduncan/iam-ssh-agent](https://hub.docker.com/r/keithduncan/iam-ssh-agent).
+as [buildkite/iam-ssh-agent](https://hub.docker.com/r/buildkite/iam-ssh-agent).
 
 ## Service
 
@@ -270,11 +270,11 @@ ssh private keys to clone private source code repositories. The same pattern is
 also applicable to init system managed virtual machines on EC2, or
 Kubernetes pods on EKS.
 
-To use the `iam-ssh-agent` service in ECS Tasks, I add a
-[keithduncan/iam-ssh-agent](https://hub.docker.com/r/keithduncan/iam-ssh-agent)
-sidecar container to my task definitions. The task definition uses a bind
-mount volume to expose the unix domain socket bound by `iam-ssh-agent` to the
-Buildkite agent container which invokes `ssh`.
+To use the `iam-ssh-agent` service in ECS Tasks, add a
+[buildkite/iam-ssh-agent](https://hub.docker.com/r/buildkite/iam-ssh-agent)
+sidecar container to your task definition with a bind mount volume to expose the
+unix domain socket bound by `iam-ssh-agent` to the Buildkite agent container
+which invokes `ssh` to clone a repository.
 
 To ensure the `iam-ssh-agent` container has booted before attempting to clone,
 the main container uses a container dependency `DependsOn: [{"Condition": "HEALTHY", "ContainerName": "ssh-agent"}]`
@@ -324,7 +324,7 @@ SshTaskDefinition:
           - daemon
           - --bind-to=/ssh/socket
         Essential: true
-        Image: keithduncan/iam-ssh-agent:latest
+        Image: buildkite/iam-ssh-agent:latest
         Environment:
           - Name: IAM_SSH_AGENT_BACKEND_URL
             Value: !Ref YourIamSshAgentBackendUrlHere

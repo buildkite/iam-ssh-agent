@@ -6,4 +6,4 @@ backend for `list keys` and `sign data` operations.
 The artifacts built from this crate are:
 
 - `iam-ssh-agent.deb` a Debian package, attached to the GitHub Release
-- `keithduncan/iam-ssh-agent:latest` a Docker image with Alpine base, pushed to Docker Hub
+- `buildkite/iam-ssh-agent:latest` a Docker image with Alpine base, pushed to Docker Hub
