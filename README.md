@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This package is no longer actively maintained or supported.
+
 # iam-ssh-agent
 
 A replacement ssh-agent that uses the caller's IAM identity to access a list of
